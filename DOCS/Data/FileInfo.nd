@@ -1,0 +1,13 @@
+1.4
+Assembly
+/home/mario/forthos1/forth_core.mac	1259686167	1	forth_core.macros
+/home/mario/forthos1/boot.s	1259687418	1	Starting point of OS
+/home/mario/forthos1/kernel_video.s	1259608925	0	/home/mario/forthos1/kernel_video.s
+/home/mario/forthos1/ext.inc	1259696057	1	extentions
+/home/mario/forthos1/gdt.s	1258988833	0	/home/mario/forthos1/gdt.s
+/home/mario/forthos1/bochsrc.txt	1258988833	0	/home/mario/forthos1/bochsrc.txt
+/home/mario/forthos1/core_retro8.asm	1259643633	0	/home/mario/forthos1/core_retro8.asm
+/home/mario/forthos1/forth_core.s	1259688662	1	forth_core
+/home/mario/forthos1/idt.s	1258988833	0	/home/mario/forthos1/idt.s
+/home/mario/forthos1/forth_words.s	1259688729	1	forth_words
+/home/mario/forthos1/kernel.s	1259690613	1	kernel

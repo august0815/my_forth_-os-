@@ -1,0 +1,18 @@
+Crash Message:
+
+   Can't locate object method "SetLineCommentSymbols" via package "NaturalDocs::Languages::forth" at /home/mario/Desktop/PROGRAMMIERUNG/DOCS/Modules/NaturalDocs/Languages.pm line 705, <CONFIG_FILEHANDLE> line 301.
+
+Natural Docs version 1.4
+Perl version 5.8.8 on linux
+
+Command Line:
+
+   -i /home/mario/forthos1 -o HTML /home/mario/Desktop/PROGRAMMIERUNG/DOCS/forthos1 -p forthos1
+
+Stack Trace:
+
+   NaturalDocs::Error::CatchDeath, called from
+   NaturalDocs::Languages::ProcessProperties, line 705, called from
+   NaturalDocs::Languages::LoadFile, line 383, called from
+   NaturalDocs::Languages::Load, line 258, called from
+   (eval), line 316 of ./NaturalDocs

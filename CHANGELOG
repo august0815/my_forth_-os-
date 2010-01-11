@@ -1,0 +1,51 @@
+CHANGELOG 
+
+26.12.2009
+
+INTERPTER/COMPILER bug removed !
+but still have to write :
+': a HERE @ . S'    S not ';'
+CLSSTACK TESTED OK ,  FORGET  TESTED OK(but simple definition) , VALUE TESTED OK
+TO TESTED OK , +TO TESTED OK
+
+25.12.2009
+
+scroll_up, in asm , tests scroll
+
+24.12.2009
+
+CONSTANT , VARIABLES , ALLOT, CELLS, ?  tested OK!
+e.g:
+55 VARIABLE a   
+100 CONSTANT b
+a ?
+a @ b + .
+
+23.12.2009
+
+testing  ' : ' 
+: w WORDS ; => result is w is new compiled word but running w fails (?)
+
+22.12.2009
+
+Cursor  waiting for input.
+Backspace
+
+21.12.2009
+
+TESTS ,Bugs
+
+
+
+20.12.2009
+
+   Remarks for NaturalDocs
+   Now '.' ; Bugs removed
+
+19.12.2009
+
+   new words added , some bugs found 
+   License
+   
+12.03.2009
+ Fork, Readme   
