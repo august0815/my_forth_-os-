@@ -95,69 +95,8 @@ defword "PRESSKEY" , PRESSKEY ,0
             dd EMIT
             dd IN
             dd CLEAR
-            dd EXIT		; EXIT		(return from FORTH word)	
-            
-defword "inter" , inter ,0	
- 			LITN 0
-			dd TST , STORE
-			dd CR
-inter1:	    dd INTERPRET
-			dd TST1,FETCH    ; endof line Interprt was OK
- 			dd ZNEQU
-			if
-				dd CR
-				LITN ok
-				dd PRINTCSTRING
-			 	dd CR  	
-				branch next1
-			then	 
-			dd TST,FETCH      ; error in einput stream
- 			dd ZNEQU
-			if  	
-				dd CR
-				LITN 10
-				dd INK
-				dd AT_HW
-				LITN zeile_buffer
-				dd PRINTCSTRING , CR	
-				LITN 12
-				dd INK
-			 	LITN errmsg
-			 	dd PRINTCSTRING 
-			 	dd PPTR_LAST,FETCH
-			 	LITN 6 ;dd LENTEILW ,FETCH
-			 	dd printt
-			 	dd CR ;dd PRESSKEY
-			 	LITN 15
-			 	dd INK
-			 	dd AT_HW
-			 	branch next1
-			then	 
-			dd PPTR , FETCH 
-            dd PPTR_LAST , STORE
-			branch inter1
-next1:		LITN 0
-            dd DUP
-			dd TST , STORE  ;clear Error_flag
-            dd TST1 , STORE ;clear End_of_Line fla
-            
-			dd EXIT  
+            dd EXIT		; EXIT		(return from FORTH word)	; function: ZEIL   TESTED_OK
 
-; function: ZEIL   TESTED_OK
-defword "ZEIL" , ZEIL ,0
-
-			
-			dd ZEILE ;, TWODROP
-			dd inter
-
-            LITN zeile_buffer
-            dd DUP
-            dd PPTR_LAST , STORE
-			dd PPTR , STORE
-           ; dd CLEAR
-            dd CLSSTACK
-            dd DROP
- 			dd EXIT		; EXIT		(return from FORTH word)
 
 ; function: DUMP   NOT TESTED_OK (not very usefull)
 defword "DUMP" , DUMP ,0
