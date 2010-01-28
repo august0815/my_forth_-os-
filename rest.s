@@ -98,95 +98,6 @@ defword "PRESSKEY" , PRESSKEY ,0
             dd EXIT		; EXIT		(return from FORTH word)	; function: ZEIL   TESTED_OK
 
 
-; function: DUMP   NOT TESTED_OK (not very usefull)
-defword "DUMP" , DUMP ,0
-;: DUMP		( addr len -- )
-;	BASE @ -ROT		( save the current BASE at the bottom of the stack )
-;	HEX			( and switch to hexadecimal mode )
-;	BEGIN
-;		?DUP		( while len > 0 )
-;	WHILE
-;		OVER 8 U.R	( print the address )
-;		SPACE		( print up to 16 words on this line )
-;		2DUP		( addr len addr len )
-;		1- 15 AND 1+	( addr len addr linelen )
-;		BEGIN
-;			?DUP		( while linelen > 0 )
-;		WHILE
-;			SWAP		( addr len linelen addr )
-;			DUP C@		( addr len linelen addr byte )
-;			2 .R SPACE	( print the byte )
-;			1+ SWAP 1-	( addr len linelen addr -- addr len addr+1 linelen-1 )
-;		REPEAT
-;		DROP		( addr len )
-;		( print the ASCII equivalents )
-;		2DUP 1- 15 AND 1+ ( addr len addr linelen )
-;		BEGIN
-;			?DUP		( while linelen > 0)
-	;	WHILE
-;			SWAP		( addr len linelen addr )
-;			DUP C@		( addr len linelen addr byte )
-;			DUP 32 128 WITHIN
-;          ( b   a  c	)		
-; 			IF	( 32 <= c < 128? )
-
-;				EMIT
-;			ELSE
-;				DROP '.' EMIT
-;			THEN
-;			1+ SWAP 1-	( addr len linelen addr -- addr len addr+1 linelen-1 )
-;		REPEAT
-;		DROP		( addr len )
-;		CR
-;		DUP 1- 15 AND 1+ ( addr len linelen )
-;		TUCK		( addr linelen len linelen )
-;		-		( addr linelen len-linelen )
-;		>R + R>		( addr+linelen len-linelen )
-;	REPEAT
-;	DROP			( restore stack )
-;	BASE !			( restore saved BASE )
-        dd BASE , FETCH , NROT , HEX
-        begin
-    	    dd QDUP
-	    while
-        	dd OVER
-        	LITN 3
-        	dd DOTR , SPACE , TWODUP , DECR
-        	LITN 15
-        	dd AND , INCR
-        begin
-        	dd QDUP
-        while
-        	dd SWAP , DUP , FETCHBYTE
-        	LITN 2
-        	dd DOTR , SPACE , INCR , SWAP , DECR
-       repeat
-        	dd DROP , TWODUP , DECR
-        	LITN 15
-        	dd AND , INCR
-      begin
-        	dd QDUP
-      while
-      	  dd SWAP , DUP , FETCHBYTE , DUP
-        	LITN 32
-       		LITN 128
-        	dd WITHIN
-       		if
-        		dd EMIT
-        	else
-        		dd DROP
-        		LITN '.'
-        		dd EMIT
-        	then
-        	dd INCR , SWAP , DECR
-       	repeat
-       	dd DROP , CR , DUP , DECR
-       	LITN 15
-        dd AND , INCR , TUCK , SUB , TOR , ADD , FROMR
-	repeat
-        dd DROP , BASE , STORE
-	dd EXIT		; EXIT		(return from FORTH word)
-
 ; ; function: STRLEN only tesing
 defword "STRLEN " , STRLEN  ,0
 ;: STRLEN 	( str -- len )
@@ -242,28 +153,7 @@ defword "WELCOM", WELCOM ,0
 ; no defcode or defword afther this line only for testing
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; function: all_INK
-; prints test string in 16 ink colors
-defword "all_INK", all_INK,0
-			LITN 15             
-            LITN 0                  
-            do
-            dd TST , FETCH
-            dd INCR 
-            dd DUP
- 			dd INK
- 			LITN osname
- 			dd PRINTCSTRING
- 			dd TAB 
- 			dd DUP
- 			dd DOT, CR
- 			dd TST ,STORE
- 			loop
- 			dd CR
- 			LITN 0
- 			dd TST, STORE
- 			dd PRESSKEY
-dd EXIT
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
