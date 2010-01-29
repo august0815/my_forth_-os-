@@ -6,68 +6,74 @@
 ;
 ; remove not used code
 section .text
-
+defvar "text_buff", text_buff, 0 ,0
 ; function: ZEILE  ; einlesen einer Zeile bis CR   TESTED_OK
 ;
 ; edi  push base address
 ; ecx		 push length
 ;zeile_buffer:  ist 1024 byte lang
-defcode "ZEILE" , ZEILE , 0
-	call _ZEILE
-	push edi		; push base address
-	push ecx		; push length
-	NEXT
-_ZEILE:
-	
-.1: mov edi,zeile_buffer	; pointer to return buffer
-.2:	call sys_key 
-    cmp al,0x08			; if not BS
-	jne .3  			;
-	call rubout         ;
-	jmp .2				; get next
-.3	stosb				; add character to return buffer
-.4	cmp al,0x13			; is < CR
-	ja .2           	;getnext
-	dec edi
-	mov al,' '
-	stosb
-	mov al,0x0          ; lastword marker
-	stosb
-	;/* Return the word (well, the static buffer) and length. */
-	sub edi,zeile_buffer
-	mov ecx,edi		; return length of the word
-	mov edi,zeile_buffer	; return address of the word
-	ret
-
-section	.data			; NB: easier to fit in the .data section
-	; A static buffer where WORD returns.  Subsequent calls
-	; overwrite this buffer.  Maximum word length is 1024 chars.
-zeile_buffer: times 1024 db 0
-
+defword  "zeile", zeile, 0
+       LITN 1
+        begin
+        while
+        dd getchar 
+        dd DUP
+        dd EMIT
+        dd DUP
+        LITN 0x0D
+        dd EQU
+        if
+        dd DROP
+        LITN 0x20
+        dd SWAP
+        dd DUP
+        dd INCR
+        dd ROT
+        dd STOREBYTE
+        LITN 0
+        dd SWAP
+        dd DUP 
+        dd INCR 
+        dd ROT
+        dd STOREBYTE
+        dd DROP
+        dd EXIT
+        then
+         dd  
+        dd SWAP 
+        dd DUP 
+        dd INCR 
+        dd ROT
+        dd STOREBYTE 
+        LITN 1
+        repeat
+        dd EXIT
+text_buffer: times 1024 db 0
+  
 section .text
-rubout:
-		dec edi
-		push    eax
-		push    ebx
-        push    ecx
-        dec dword [var_CURSOR_POS_X]
-        mov al,' '
-        and     eax,0x000000FF
-        or      eax,[var_SCREEN_COLOR]
-        mov     ecx,eax
-        mov     eax,[var_CURSOR_POS_X]
-        mov     ebx,[var_CURSOR_POS_Y]
-        push    ebx
-        imul    ebx,[video_width]
-        add     eax,ebx
-        shl     eax,1
-        add     eax,[video_base]
-        pop     ebx
-        mov     [eax],cx
-        pop     ecx
-        pop     ebx
-        pop     eax
-	ret	
+;rubout:
+;		dec edi
+;		push    eax
+;		push    ebx
+;        push    ecx
+;        dec dword [var_CURSOR_POS_X]
+;        mov al,' '
+;        and     eax,0x000000FF
+;        or      eax,[var_SCREEN_COLOR]
+;        mov     ecx,eax
+;        mov     eax,[var_CURSOR_POS_X]
+;        mov     ebx,[var_CURSOR_POS_Y]
+;        push    ebx
+;        imul    ebx,[video_width]
+;        add     eax,ebx
+;        shl     eax,1
+;        add     eax,[video_base]
+;        pop     ebx
+;        mov     [eax],cx
+;        pop     ecx
+;        pop     ebx
+;        pop     eax
+;	ret	
 	
 ; function:  NUMBER  TESTED_OK
 ;
@@ -453,7 +459,7 @@ inter1:	    dd INTERPRET
 				LITN 10
 				dd INK
 				dd AT_HW
-				LITN zeile_buffer
+				LITN text_buffer
 				dd PRINTCSTRING , CR	
 				LITN 12
 				dd INK
@@ -479,18 +485,20 @@ next1:		LITN 0
 			dd EXIT  
 
 defword "ZEIL" , ZEIL ,0
-
-			
-			dd ZEILE ;, TWODROP
-			dd inter
-
-            LITN zeile_buffer
-            dd DUP
-            dd PPTR_LAST , STORE
-			dd PPTR , STORE
-           ; dd CLEAR
-            dd CLSSTACK
-            dd DROP
+       	LITN text_buffer
+        dd DUP
+        dd text_buff
+        dd STORE 
+        dd zeile
+       ; dd ZEILEMIT 
+        dd inter
+        LITN text_buffer
+        dd DUP
+        dd PPTR_LAST
+        dd STORE
+        dd PPTR
+        dd STORE
+        ;  clsstack drop
  			dd EXIT		; EXIT		(return from FORTH word)
 
 %include "ext1.s"

@@ -1,12 +1,7 @@
 ; file: kernel_video
 
 [BITS 32]
-defcode "OUTB", OUTB, 0
-            ; ( val addr -- )
-            pop edx
-            pop eax
-            out dx, al
-            NEXT
+
 		
 ; Screen words
 ;defconst SCREEN, SCREEN, 0, 0xB8000
@@ -20,339 +15,488 @@ defvar "SCREEN_COLOR", SCREEN_COLOR, 0, 0x0f00
 defvar "KEYBUFF" , KEYBUFF , 0 , 0
 
 section .text
-; function: AT_HW
-defword "ATHW", AT_HW , 0
-            dd CURSOR_POS_REL
-            LITN 14             ; Tell we'll send high byte of position
-            LITN 0x3D4          ;
-            dd OUTB             ;
+; function: outb
+;   Executes an out assembly instruction
+;
+; Stack:
+;   val port --
+;
+; Parameters:
+;   val - The value to out. Byte.
+;   port - The port to output the value. int16.
+defcode "outb", outb, 0
+        pop edx
+        pop eax
+        out dx, al
+        NEXT
 
-            dd DUP, FETCH       ; Send high byte
-            LITN 1              ;
-            dd N_BYTE           ;
-            LITN 0x3D5          ;
-            dd OUTB             ;
+; function: inb
+;   Executes an IN assembly instruction
+;
+; Stack:
+;   port -- val
+defcode "inb", inb, 0
+        pop edx
+        xor eax, eax
+        in  al, dx
+        push eax
+        NEXT
+        
+; function: cursor_pos_rel
+;   Returns the cursor relative position respect to the origin of the screen
+;
+; Stack
+;   -- cursor_pos_rel
+defword  "cursor_pos_rel", cursor_pos_rel, 0
+        dd CURSOR_POS_Y
+        dd FETCH
+        LITN 160 
+        dd MUL
+        dd CURSOR_POS_X
+        dd FETCH
+        LITN 2 
+        dd MUL
+        dd ADD
+        dd EXIT
 
-            LITN 15             ; Tell we'll send low byte of position
-            LITN 0x3D4          ;
-            dd OUTB             ;
+; function: cursor_pos
+;   Returns the absolute address of the cursor.
+;
+; Stack
+;   -- cursor_pos
+defword  "cursor_pos", cursor_pos, 0
+        dd cursor_pos_rel
+        dd SCREEN
+        dd ADD
+        dd EXIT
 
-            dd FETCH            ; Send low byte
-            LITN 0x3D5          ;
-            dd OUTB             ;
-            dd EXIT
-          
+; function: at_hw
+;   Moves the cursor to the position indicated by cursor_pos variables.
+;
+; Stack:
+;   --
+defword  "AT_HW", AT_HW, 0
+        dd cursor_pos_rel
+        ;  Get the position of the cursor
+        LITN 14 
+        LITN 0x3D4
+        dd outb
+        ;  Say you're going to send the high byte
+        dd DUP
+        LITN 1 
+        dd N_BYTE
+        ;  ... get the higer byte
+        LITN 0x3D5
+        dd outb
+        ;  ... and send it
+        LITN 15 
+        LITN 0x3D4
+        dd outb
+        ;  Say you're going to send the low bye
+        LITN 0x3D5
+        dd outb
+        ;  ... and send it
+        dd EXIT
 
-; function: atx  (y:line x:col --)
-defword "atx", atx, 0
-            dd CURSOR_POS_X, STORE
-            dd CURSOR_POS_Y, STORE
-            ;dd AT_HW
-            dd EXIT
+; function: atx
+;   Moves the cursor thoe the coordinates indicated. It updates the cursor_pos
+;   variables.
+; 
+; Stack:
+;   y x --
+defword  "atx", atx, 0
+        dd CURSOR_POS_X
+        dd STORE
+        dd CURSOR_POS_Y
+        dd STORE
+        dd EXIT
 
-; function: INK   (ink --)
+; function: ink
+;   Set the ink color.
+;
+; Stack:
+;   color --
 defcode "INK", INK, 0
-            pop eax
-            and eax, 0x0f
-            shl eax, 8
-            mov ebx, [var_SCREEN_COLOR]
-            and ebx, 0xf000
-            or eax, ebx
-            mov [var_SCREEN_COLOR], eax
-            NEXT
+        pop eax
+        and eax, 0x0f
+        shl eax, 8
+        mov ebx, [var_SCREEN_COLOR]
+        and ebx, 0xf000
+        or eax, ebx
+        mov [var_SCREEN_COLOR], eax
+        NEXT
 
-; function: BG   (ink --)
-defcode "BG", BG, 0
-            pop eax
-            and eax, 0x0f
-            shl eax, 12
-            mov ebx, [var_SCREEN_COLOR]
-            and ebx, 0x0f00
-            or eax, ebx
-            mov [var_SCREEN_COLOR], eax
-            NEXT
+; function: bg
+;   Sets the background color.
+;
+; Stack:
+;   color --
+defcode "bg", bg, 0
+        pop eax
+        and eax, 0x0f
+        shl eax, 12
+        mov ebx, [var_SCREEN_COLOR]
+        and ebx, 0x0f00
+        or eax, ebx
+        mov [var_SCREEN_COLOR], eax
+        NEXT
 
-; function: C>CW, CHAR_TO_CHARWORD   ( char -- charword )
-; Converts a character in a charword (attributes+character)
-defcode "C>CW", CHAR_TO_CHARWORD, 0
-            pop eax
-            and eax, 0xff
-            mov ebx, [var_SCREEN_COLOR]
-            ;shl ebx, 8
-            or eax, ebx
-            push eax
-            NEXT
+; function:  bright
+;   Takes a color and returns its brighter version.
+;
+; Stack:
+;   color -- color
+defword  "bright", bright, 0
+        LITN 8 
+        dd ADD
+        dd EXIT
 
-; function:  BRIGHT
-defword "BRIGHT", BRIGHT, 0
-            dd LIT
-            dd 8
-            dd ADD
-            dd EXIT
+; function screen_scroll
+;
+; Stack
+;   --
+defword  "screen_scroll", screen_scroll, 0
+        dd SCREEN
+        dd DUP
+        LITN 160 
+        dd ADD
+        dd SWAP
+        LITN 3840 
+        dd CMOVE
+        ;  TODO - Clean last line, move cursor
+        dd _clean_last_line
+        dd EXIT
 
-; function: CURSOR_POS_REL  ( -- cursorpos)
-defword "CURSOR_POS_REL", CURSOR_POS_REL, 0
-            ; ( -- cursorpos)
-            dd CURSOR_POS_Y, FETCH
-            LITN 160
-            dd MUL
-            dd CURSOR_POS_X, FETCH
-            LITN 2
-            dd MUL
-            dd ADD
-            dd EXIT
+defword  "_clean_last_line", _clean_last_line, 0
+        dd SCREEN
+        dd DUP
+        LITN 4000 
+        dd ADD
+        dd SWAP
+        LITN 3840 
+        dd ADD
+        do
+        dd SCREEN_COLOR
+        dd FETCH
+        dd OVER
+        dd STOREWORD
+        dd INCR
+        loop
+        dd EXIT
 
-; function: CURSOR_POS
-defword "CURSOR_POS", CURSOR_POS, 0
-            dd CURSOR_POS_REL
-            dd SCREEN   ; constante
-            dd ADD
-            dd EXIT
+; function: screen_scroll_
+;   Scrolls the screen if the cursor goes beyond line 24.
+;
+; Stack:
+;   --
+defword  "screen_scroll_", screen_scroll_, 0
+        dd CURSOR_POS_Y
+        dd FETCH
+        LITN 24 
+        dd GT
+        if
+        dd screen_scroll
+        LITN 24 
+        dd CURSOR_POS_Y
+        dd STORE
+        then
+        dd EXIT
 
-; function: SCREEN_SCROLL
-defcode "SCREEN_SCROLL", SCREEN_SCROLL, 0
-            call scroll_up
-            dd NEXT
+; function: cursor_forward
+;   Moves the cursor forward.
+;
+; Stack:
+;   --
+defword  "cursor_forward", cursor_forward, 0
+        LITN 1 
+        dd CURSOR_POS_X
+        dd FETCH
+        dd ADD
+        LITN 80 
+        dd DIVMOD
+        dd CURSOR_POS_Y
+        dd ADDSTORE
+        dd CURSOR_POS_X
+        dd STORE
+        dd screen_scroll_
+        dd EXIT
 
-; function: SCREEN_SCROLL_
-defword "SCREEN_SCROLL_", SCREEN_SCROLL_, 0
-            dd CURSOR_POS_Y, FETCH
-            LITN 24
-            dd GT		;CURSOR_POS_Y>24 !!
-            if
-                LITN 24
-                dd CURSOR_POS_Y, STORE
-                LITN 0
-                dd CURSOR_POS_X, STORE
-                dd SCREEN_SCROLL
-            then
-            dd EXIT
+; function: c>cw, char_to_charword
+;   Converts a character in a charword.
+;
+;   A charword is a 16bits word with information about the character to be 
+;   printed and its colors.
+;
+; Stack:
+;   char -- charword
+defcode "c>cw", char_to_charword, 0
+        pop eax
+        and eax, 0xff
+        mov ebx, [var_SCREEN_COLOR]
+        or eax, ebx
+        push eax
+        NEXT
 
-; function: CURSOR_FORWARD
-defword "CURSOR_FORWARD", CURSOR_FORWARD, 0
-            LITN 1
-            dd CURSOR_POS_X, ADDSTORE
-            dd CURSOR_POS_X, FETCH
-            LITN 80
-            dd DIVMOD
-            dd CURSOR_POS_Y, ADDSTORE
-            dd CURSOR_POS_X, STORE
-            dd SCREEN_SCROLL_
-            dd AT_HW
-            dd EXIT
 
-; function: EMITCW (charword --)
-; prints a charword (attributes+character)
-defword "EMITCW", EMITCW, 0
-             dd CURSOR_POS
-            dd STOREWORD
-            dd CURSOR_FORWARD
-            dd EXIT
+; function: emitcw
+;   Prinst a character word
+;
+; Stack:
+;   charword --
+defword  "emitcw", emitcw, 0
+        dd cursor_pos
+        dd STOREWORD
+        dd cursor_forward
+        dd EXIT
 
-; function: EMIT (char --)
-defword "EMIT" , EMIT , 0
-            dd CHAR_TO_CHARWORD
-            dd EMITCW
-            dd EXIT
+; function: emit
+;   Prinst a character.
+;
+; Stack:
+;   char --
+defword  "EMIT", EMIT, 0
+        dd char_to_charword
+        dd emitcw
+        dd EXIT
 
-; function: PRINTCSTRING(&cstring --)
-defword "PRINTCSTRING", PRINTCSTRING, 0
-            begin
-                dd DUP, FETCHBYTE, DUP
-            while
-                dd EMIT, INCR
-            repeat
-            dd DROP, DROP
-            dd EXIT
+; function: printcstring
+;   Prints a C string
+;
+; Stack:
+;   &string --
+defword  "PRINTCSTRING", PRINTCSTRING, 0
+        begin
+        dd DUP
+        dd FETCHBYTE
+        dd DUP
+        while
+        dd EMIT
+        dd INCR
+        repeat
+        dd TWODROP
+        dd EXIT
             
-; function: CLEAR   (--)           
-defword "CLEAR", CLEAR, 0
-            LITN 0                  ; Cursor at 0,0
-            LITN 0                  ;
-            dd atx                  ;
-            LITN 80*25              ; for i = 0 to 80*25
-            LITN 0                  ;
-            do
-                LITN ' '            ;   emit ' '
-                dd EMIT             ;
-            loop
-            LITN 0                  ; Cursor at 0,0
-            LITN 0                  ;
-            dd atx                  ;
-            dd EXIT
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; new code
-            
-; function: CR            
-defword "CR", CR , 0 ; TESTED_OK
-			LITN 1
-            dd CURSOR_POS_Y, ADDSTORE
-            LITN 0
-            dd CURSOR_POS_X, STORE
-			dd AT_HW
-			dd SCREEN_SCROLL_
-		 	dd EXIT
+; function: clear 
+;   Clear the screen
+;
+; Stack:
+;   char --
+defword  "CLEAR", CLEAR, 0
+        LITN 0 
+        LITN 0 
+        dd atx
+        LITN 2000 
+        LITN 0 
+        do
+        dd spc
+        loop
+        LITN 0 
+        LITN 0 
+        dd atx
+        dd EXIT
+
+; function: cr            
+;   Prints a cr
+;
+; Stack:
+;    --
+defword  "CR", CR, 0
+        LITN 1 
+        dd CURSOR_POS_Y
+        dd ADDSTORE
+        LITN 0 
+        dd CURSOR_POS_X
+        dd STORE
+        dd AT_HW
+        dd screen_scroll_
+        dd EXIT
+
+; function: spc
+;   Prints a space
+defword  "spc", spc, 0
+        LITN 32 
+        dd EMIT
+        dd EXIT
 		 	
-
-; function: TAB
-defword "TAB" , TAB ,0	
-			LITN 8
-            dd CURSOR_POS_X, ADDSTORE
-			dd AT_HW
-			dd SCREEN_SCROLL_
-			dd EXIT		
-
-;THIS IS CODE FORM retro8 by crc
-;			
-; function: IN => KEY		 TESTED_OK
-defcode "IN" ,IN ,0 ; 
-		call sys_key
-		NEXT
-
-;THIS IS CODE FORM retro8 by crc
-;	rewrite it? some day?		
-sys_key:
- 	xor   ebx,ebx  		; Show the coursor
-	mov   bl,[var_CURSOR_POS_X]				     
-	mov   ecx,ebx
-	mov   bl,[var_CURSOR_POS_Y]				      
-	mov   eax,80
-	mul   bx
-	add   eax,ecx				       
-    mov   edx,0x3d4 
-	mov   ecx,eax
-	mov   al,15
-	out   dx,al
-	mov   eax,ecx
-	inc   edx
-	out   dx,al
-	mov   al,14
-	dec   edx
-	out   dx,al
-	mov   eax,ecx
-	mov   al,ah
-	inc   edx
-	out   dx,al			; Show the coursor end
-	xor eax,eax	        ;  clear eax
-.1:	in al,64h		;  Is any data waiting?
-	test al,1	        ;  Is character = ASCII 0?
-	jz .1		        ;  Yes? Try again
-	in al,60h	        ;  Otherwise, read scancode
-	xor edx,edx	        ;  edx: 0=make, 1=break
-	test al,80h	        ;  Is character = HEX 80h?
-	jz .2		        ;  Skip the next line
-	inc edx 	        ;  Update edx
-.2:	 and al,7Fh		;  Filters to handle
-	cmp al,39h	        ;  the ignored keys
-	  ja .1 	        ;  We just try another key
-	mov ecx,[board]         ;  Load the keymap
-	mov al,[ecx+eax]        ;  Get the key ASCII char
-	  or al,al		        ;  Is is = 0?
-	js .shift		        ;  No, use CAPITALS
-	jz .1		        ;  Ignore 0's
-	or dl,dl		        ;  Filter for break code
-	jnz .1		        ;  Ignore break code
-	;THIS IS CODE FORM retro8 by crc  END
-	mov dword [var_KEYBUFF],eax
-	   ; echo
-        push    eax
-        push    ebx
-        push    ecx
-        cmp		al,0x08 ;don't display BS
-        jbe .3
-        cmp		al,0x0D ;don't display CR
-        jbe .3
-        and     eax,0x000000FF
-        or      eax,[var_SCREEN_COLOR]
-        mov     ecx,eax
-        mov     eax,[var_CURSOR_POS_X]
-        inc dword [var_CURSOR_POS_X]
-        mov     ebx,[var_CURSOR_POS_Y]
-     	push    ebx
-        imul    ebx,[video_width]
-        add     eax,ebx
-        shl     eax,1
-        add     eax,[video_base]
-        pop     ebx
-        mov     [eax],cx
-.3:
-       
-        pop     ecx
-        pop     ebx
-        pop     eax
-	ret
-
-;THIS IS CODE FORM retro8 by crc	
-.shift:  mov ecx,[edx*4 + .shifts]	 ;  Load the CAPITAL keymap
-	mov [board],ecx 	        ;  Store into BOARD pointer
-	jmp .1			  ;  And try again
-.shifts dd shift,alpha
-board dd alpha
-alpha:
-  db 0,27,"1234567890-=",8	        ;00-0E
-  db 9,"qwertyuiop[]",10	        ;0F-1C
-  db 0,"asdfghjkl;'`"		        ;1D-29
-  db -1,"\zxcvbnm,./",-1,"+",0,32,-2    ;2A-3A
-shift:
-  db 0,27,"!@#$%^&*()_+",8	        ;00-0E
-  db 9,"QWERTYUIOP{}",10	        ;0F-1C
-  db 0,'ASDFGHJKL:"~'		        ;1D-29
-  db -1,"|ZXCVBNM<>?",-1,"=",0,32,-2    ;2A-3A
-
-;THIS IS CODE FORM retro8 by crc end
-;---------------------------------------------------------------
-video_base:     dd      0xB8000
-video_width:    dd      80
-video_height:   dd      25
-;--------------scroll up---------------------------------------
-;-------------in asm , maybe sometime in defwords ??
-;-------------smoetimes pos (0,24) after scroll is lost !?? why
-;-------------calling routines ?
-scroll_up:								;
-        push    eax
-        push    ebx
-        push    ecx
-		mov     eax,0                	 ; Get offset for (0,1)
-        lea     ebx,[eax+1]
-        push    ebx
-        imul    ebx,[video_width]
-        add     eax,ebx
-        shl     eax,1        
-        add     eax,[video_base]        
-        pop     ebx             		; EAX  source
-	    mov     ebx,[video_base]       	; EBX  destination address
-	    mov     ecx,0xf00			   	; ECX  number of bytes to move
-	    mov edx, esi				 	; memory_move     				
-        mov edi,ebx      
-        mov esi,eax       
-        rep movsb     
-        mov esi, edx        			; Overwrite  bottom.
-        mov     eax,0
-        mov     ebx,[video_height]
-        dec     ebx
-        push    ebx
-        imul    ebx,[video_width]
-        add     eax,ebx
-        shl     eax,1        
-        add     eax,[video_base]        
-        pop     ebx
-        mov     ebx,[video_width]
-        mov     ecx,[var_SCREEN_COLOR]
-   		mov     cx,' '
-.1:		mov     [eax],cx
-        add     eax,2
-        dec     ebx
-        or      ebx,ebx
-        jnz     .1
-        pop     ecx
-        pop     ebx
-        pop     eax
-        ret
+; function: tab
+;   Prints a tab.
+;
+; Stack:
+;   --
+defword  "TAB", TAB, 0
+        ;  TODO - Move to the next column multiple of 8
+        LITN 8 
+        dd CURSOR_POS_X
+        dd ADDSTORE
+        dd AT_HW
+        dd EXIT
 
 
+%define _key_stat_caps 0x01
+%define _key_stat_shift 0x02
+
+; variable: key_status
+;   Store the status of caps, shift and CONTROL keys.
+defvar "key_status", key_status, 0, 0
+
+; function: kbd_flags
+;   Returns the keyboard status code.
+;
+; Stack:
+;   -- kbd_status
+defword "kbd_flags", kbd_flags, 0
+     LITN 0x64 
+     dd  inb
+dd EXIT
+
+; function: kbd_buffer_full
+;   true if there is a scancode waiting to be readed
+;
+; Stack:
+;   -- bool
+defword  "kbd_buffer_full", kbd_buffer_full, 0
+    dd kbd_flags 
+    LITN 1
+    dd AND
+dd EXIT
+
+; function: kbd_scancode_now
+;   Returns the scancode readed on the keyboard at this moment.
+;
+; Stack:
+;   -- scancode
+defword  "kbd_scancode_now", kbd_scancode_now, 0
+        LITN 0x60
+        dd inb
+        dd EXIT
+
+; function: kbd_scancode
+;   Waits for a key pressed and returns its sacancode.
+;
+; Stack:
+;   -- scancode
+defword  "kbd_scancode", kbd_scancode, 0
+        begin
+        dd kbd_buffer_full
+        until
+        dd kbd_scancode_now
+        LITN 0xFF
+        dd AND
+        dd EXIT
+
+
+; function _tx_key_status
+;   Test and xor the key_status variable.
+;
+;   If the scancode is equal to the given test, makes an xor
+;   between key_status and flags.
+;
+; stack:
+;   scancode test flag --
+defword  "_tx_key_status", _tx_key_status, 0
+        dd ROT
+        dd EQU
+        if
+        dd key_status
+        dd FETCH
+        dd XOR
+        dd key_status
+        dd STORE
+        else
+        dd DROP
+        then
+        dd EXIT
+
+; function: _update_key_status
+;   Updates the kbd_flags variable according with the scancode given.
+;
+; Stack:
+;   scancode --
+defword  "_update_key_status", _update_key_status, 0
+        ;  TODO - xor could fail in some cases. Set o clear the bit.
+        dd DUP
+        LITN 58 
+        LITN _key_stat_caps
+        dd _tx_key_status
+        ;  caps   down
+        dd DUP
+        LITN 42 
+        LITN _key_stat_shift
+        dd _tx_key_status
+        ;  lshift down
+        dd DUP
+        LITN 170 
+        LITN _key_stat_shift
+        dd _tx_key_status
+        ;  lshift up
+        dd DUP
+        LITN 54 
+        LITN _key_stat_shift
+        dd _tx_key_status
+        ;  rshift down
+        dd DUP
+        LITN 182 
+        LITN _key_stat_shift
+        dd _tx_key_status
+        ;  rshift up
+        dd DROP
+        dd EXIT
+
+; stack:
+;   scancode -- bool
+defword  "_key_down?", _key_down?, 0
+        LITN 0x80
+        dd AND
+        dd ZEQU
+        ; 0x79 and 0<>
+        dd EXIT
+
+; function: sc>c (SCANCODE2CHAR)
+;   Converts a scancode to an ASCII character.
+; 
+;   If the scancode correspond to keyup or to a non-character
+;   it returns 0
+;
+; stack:
+;   scancode -- char
+defword  "sc>c", scancode2char, 0
+        dd DUP
+        dd _key_down?
+        if
+        LITN 4 
+        dd MUL
+        dd key_status
+        dd FETCH
+        dd ADD
+        LITN keymap
+        dd ADD
+        dd FETCHBYTE
+        else
+        dd DROP
+        LITN 0 
+        then
+        dd EXIT
+;%undef LINK             ;   previous one
+;%xdefine LINK  _video_end ;
+; function: getchar
+;   Waits for a key to be pressed and then returns its ASCII code.
+;
+; Stack:
+;   -- c
+defword  "getchar", getchar, 0
+        LITN 0
+        begin
+        dd DROP
+        dd kbd_scancode
+        dd DUP
+        dd _update_key_status
+         dd scancode2char
+        dd DUP
+        until
+        dd EXIT
 
 
 
-%include "ext.s"	  ; the new files for include		
+%include "kbd_map.s"	  ; the new files for include		
 				
 ;%endif

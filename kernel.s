@@ -55,7 +55,7 @@ mes:        dd MES1
  			dd CR
  			dd HEX
  			dd PRESSKEY
-			dd highlevel ,CLEAR
+			; dd highlevel ,CLEAR
 			dd MES2
 int: 			 	 
 			dd ZEIL

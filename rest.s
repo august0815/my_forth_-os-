@@ -49,7 +49,7 @@ defword "ZEILEMIT",ZEILEMIT,0
  			dd CR
  			LITN '>'
  			dd EMIT
- 			LITN zeile_buffer
+ 			LITN text_buffer
             ;dd KEYBUFF
             dd PRINTCSTRING
             LITN '<'
@@ -93,7 +93,7 @@ defword "PRESSKEY" , PRESSKEY ,0
             dd TAB
             LITN '!'
             dd EMIT
-            dd IN
+            dd getchar
             dd CLEAR
             dd EXIT		; EXIT		(return from FORTH word)	; function: ZEIL   TESTED_OK
 
@@ -123,7 +123,7 @@ dd EXIT		; EXIT		(return from FORTH word)
 ; function: WELCOME must be the LAST WORD !! LATEST points here <==
 wel:
 defword "WELCOM", WELCOM ,0  
-			LITN zeile_buffer
+			LITN text_buffer
 			dd DUP
             dd PPTR_LAST , STORE
 			dd PPTR , STORE
@@ -160,11 +160,11 @@ defword "WELCOM", WELCOM ,0
 ; function: linemove
 ; moves the 'string' to zeile_buffer the line input buffer	
 defword "linemove", linemove ,0
-	LITN zeile_buffer   ;   destination address
+	LITN text_buffer   ;   destination address
 	LITN 300			;   number of bytes to move
 	dd CMOVE			; memory_move 
 	dd inter    
-	LITN zeile_buffer
+	LITN text_buffer
 	dd PPTR , STORE
 	dd EXIT
 ; function: highlevel 
@@ -172,7 +172,7 @@ defword "linemove", linemove ,0
 defword "highlevel" , highlevel ,0
 ;At the moment there is no file system, so we have to simulate lineinput
 	dd DECIMAL
-    LITN zeile_buffer
+    LITN text_buffer
 	dd PPTR , STORE
 	LITN comp			;   source
 	dd linemove
