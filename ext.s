@@ -501,4 +501,4 @@ defword "ZEIL" , ZEIL ,0
         ;  clsstack drop
  			dd EXIT		; EXIT		(return from FORTH word)
 
-%include "ext1.s"
+%include "rest.s"

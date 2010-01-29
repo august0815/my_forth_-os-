@@ -256,4 +256,4 @@ SEE3:	dd	DUP,FETCH,UDOT		;display number
 SEE4:	dd PRESSKEY			;user control
 		zbranch SEE1
 		dd	DROP,EXIT		
-%include "rest.s"
+;%include "rest.s"
