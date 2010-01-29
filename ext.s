@@ -467,7 +467,7 @@ inter1:	    dd INTERPRET
 			 	dd PRINTCSTRING 
 			 	dd PPTR_LAST,FETCH
 			 	LITN 6 ;dd LENTEILW ,FETCH
-			 	dd printt
+			 	dd PRINTCSTRING
 			 	dd CR ;dd PRESSKEY
 			 	LITN 15
 			 	dd INK

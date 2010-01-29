@@ -48,13 +48,9 @@ cold_start:
 			dd WELCOM
 			dd CLEAR 
 mes:        dd MES1
-			dd DECIMAL
+			
 			dd CLEAR
-			dd WORDS
- 			dd CR
- 			dd CR
- 			dd HEX
- 			dd PRESSKEY
+			dd PRESSKEY
 			dd MES2
 int: 			 	 
 			dd ZEIL

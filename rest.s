@@ -83,7 +83,7 @@ dd EXIT		; EXIT		(return from FORTH word)
 
 ; function: TELL   rewrite it !!!! still for linux
 defword "TELL" ,TELL , 0
-	dd DOTS, EMIT, STOP
+	dd EMIT, STOP
 	dd EXIT
 
 ; function: PRESSKEY   TESTED_OK
