@@ -51,29 +51,7 @@ defword  "zeile", zeile, 0
 text_buffer: times 1024 db 0
   
 section .text
-;rubout:
-;		dec edi
-;		push    eax
-;		push    ebx
-;        push    ecx
-;        dec dword [var_CURSOR_POS_X]
-;        mov al,' '
-;        and     eax,0x000000FF
-;        or      eax,[var_SCREEN_COLOR]
-;        mov     ecx,eax
-;        mov     eax,[var_CURSOR_POS_X]
-;        mov     ebx,[var_CURSOR_POS_Y]
-;        push    ebx
-;        imul    ebx,[video_width]
-;        add     eax,ebx
-;        shl     eax,1
-;        add     eax,[video_base]
-;        pop     ebx
-;        mov     [eax],cx
-;        pop     ecx
-;        pop     ebx
-;        pop     eax
-;	ret	
+
 	
 ; function:  NUMBER  TESTED_OK
 ;
