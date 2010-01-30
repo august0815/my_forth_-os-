@@ -1,9 +1,9 @@
 ;  program: kernel
 ;**   ___________________________________________________________________________
 
-; func:   Version 0.01
+; func:   Version 0.01a
 
-; section:   Copyright (C) 2009 jdinuncio (José Dinuncio) and august0815 (Mario Marcec)
+; section:   Copyright (C) 2010 august0815 (Mario Marcec)
 
  
   
@@ -27,6 +27,9 @@ defvar "PPTR_LAST", PPTR_LAST, 0 , 0
 defvar "GRUB", GRUB, 0, 0
 global var_GRUB
 defvar "text_buff", text_buff, 0 ,0
+defvar "SRC", SRC, 0 , 0
+defvar "SRC_END", SRC_END, 0 , 0
+defvar "FILP", FILP, 0 , 0
 ; Assembly Entry point
 section .text
 extern module

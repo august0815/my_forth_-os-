@@ -414,6 +414,12 @@ defcode "INTERPRET",INTERPRET,0
 	mov	dword [var_TST] ,0xffff
 	NEXT
 
+defcode "CHAR", CHAR, 0
+	call _tlwd		
+	xor eax,eax
+	mov al,[edi]
+	push eax	
+	NEXT
 ; defword: printt  TESTED_OK
 ;
 ; prints an string of len , pointer to string
@@ -429,15 +435,23 @@ defword "printt", printt, 0
 defword "inter" , inter ,0	
  			LITN 0
 			dd TST , STORE
+			dd NOECHO ,FETCH
+			dd  ZNEQU
+			if
 			dd CR
+			then
 inter1:	    dd INTERPRET
 			dd TST1,FETCH    ; endof line Interprt was OK
  			dd ZNEQU
 			if
+				dd NOECHO ,FETCH
+				dd  ZNEQU
+				if
 				dd CR
 				LITN ok
 				dd PRINTCSTRING
 			 	dd CR  	
+			 	then
 				branch next1
 			then	 
 			dd TST,FETCH      ; error in einput stream
@@ -446,7 +460,7 @@ inter1:	    dd INTERPRET
 				dd CR
 				LITN 10
 				dd INK
-				dd AT_HW
+				
 				LITN text_buffer
 				dd PRINTCSTRING , CR	
 				LITN 12
@@ -459,7 +473,7 @@ inter1:	    dd INTERPRET
 			 	dd CR ;dd PRESSKEY
 			 	LITN 15
 			 	dd INK
-			 	dd AT_HW
+			 	dd PRESSKEY,DROP
 			 	branch next1
 			then	 
 			dd PPTR , FETCH 
@@ -489,4 +503,118 @@ defword "ZEIL" , ZEIL ,0
         ;  clsstack drop
  			dd EXIT		; EXIT		(return from FORTH word)
 
+
+
+defword "linecopy" , linecopy ,0
+	dd DUP, FETCHBYTE  ; IF LF am Anfang der Zeile 
+	LITN 0x0a
+	dd EQU
+	if 
+	branch lf
+	then
+	
+	begin
+	dd DUP, FETCHBYTE , DUP 
+	LITN 0x3b
+	dd NEQU
+	while
+	dd DUP 
+	 LITN 0x0a   ; wenn LF dann SPACE
+	 dd EQU
+	 if 
+	 dd DROP 
+	 LITN 0x20
+	 then
+	 
+	 dd DUP 
+	 LITN 0x09   ; wenn TAB dann SPACE
+	 dd EQU
+	 if 
+	 dd DROP 
+	 LITN 0x20
+	 then
+	
+	 dd PPTR, FETCH,STOREBYTE
+	 LITN 1 
+	 dd PPTR ,ADDSTORE
+	 dd INCR
+	repeat
+	LITN 0x3b
+	dd PPTR
+	dd FETCH
+	dd STOREBYTE
+	LITN 1 
+	dd PPTR ,ADDSTORE
+	dd INCR
+	dd FILP ,STORE
+	
+lf:	LITN 0xd
+	dd PPTR
+	dd FETCH
+	dd STOREBYTE
+	LITN 1 
+	dd PPTR ,ADDSTORE
+	dd INCR
+	dd FILP ,STORE
+	LITN 0x0 ; ENDING 0 for PRINTSTRING
+	dd PPTR
+	dd FETCH
+	dd STOREBYTE
+	dd EXIT
+
+defword "interforth" ,interforth ,0
+;dd DECIMAL
+	dd SRC ,FETCH
+	dd FILP
+	dd STORE
+	LITN text_buffer
+	dd PPTR , STORE
+	
+lop:dd FILP	,FETCH	
+    dd linecopy
+	
+	LITN text_buffer
+	dd PPTR , STORE
+ 	 dd NOECHO ,FETCH
+	dd  ZNEQU
+	if
+	dd CR,CR
+	 LITN text_buffer
+	 dd PRINTCSTRING
+	 ;dd PRESSKEY
+	;dd PRESSKEY
+	then
+	;dd EXIT
+	;LITN zeile_buffer
+	;dd PPTR , STORE
+	
+dd inter
+          	LITN text_buffer
+			dd DUP
+            dd PPTR_LAST , STORE
+			dd PPTR , STORE
+            ;dd CLEAR
+            ;dd CLSSTACK
+           ; dd DROP	
+
+	LITN 1
+	dd  FILP
+	dd ADDSTORE
+	dd FILP ,FETCH
+	dd FETCHBYTE;test ob EOF
+	dd QDUP
+	if 
+	 	LITN -1
+		dd  FILP
+		dd ADDSTORE
+	 
+	else
+	 branch fertig
+	then
+	
+	
+	;dd PRESSKEY	
+	branch lop	
+	
+fertig:	dd EXIT
 %include "ext1.s"

@@ -85,7 +85,16 @@ dd EXIT		; EXIT		(return from FORTH word)
 defword "TELL" ,TELL , 0
 	dd EMIT, STOP
 	dd EXIT
-
+; function: echooff   TESTED_OK
+defword "echooff" , echooff ,0
+			LITN 0
+      		dd NOECHO,STORE
+      		dd  EXIT	;		(return from FORTH word)	
+; function: echoon   TESTED_OK
+defword "echoon" , echoon ,0
+			LITN 1
+      		dd NOECHO,STORE
+      		dd  EXIT	;		(return from FORTH word)
 ; function: PRESSKEY   TESTED_OK
 defword "PRESSKEY" , PRESSKEY ,0
       		LITN key_press
@@ -104,22 +113,34 @@ defword "show", show, 0
         dd FETCH
         LITN 0x14
         dd ADD
-        dd FETCH ,DOTS ,CR
+        dd FETCH 
         dd GRUB
         dd FETCH
         LITN 0x18
         dd ADD
-        dd FETCH,DOTS ,CR
+        dd FETCH
         dd DUP
         dd FETCH
         dd SWAP
-        dd INCR4
-        dd FETCH ,DOTS ,CR
+        dd INCR4 
+        dd FETCH 
         dd SWAP
         dd TWODUP
         dd SUB
-        dd NROT
-        dd DROP ,DOTS ,CR
+        dd NROT , INCR
+        dd SRC_END
+        dd STORE
+        LITN 0
+        dd SRC_END ,STOREBYTE
+        dd SWAP
+        dd DUP
+        dd SRC
+        dd STORE
+        dd SWAP
+        dd TWODROP
+        dd DROP
+        dd interforth
+        dd DROP 
         dd printt
         LITN text_buffer
         dd text_buff
@@ -128,6 +149,7 @@ defword "show", show, 0
         dd text_buff
         dd FETCH
         dd STOREBYTE
+      
 dd EXIT
 
 ; function: WELCOME must be the LAST WORD !! LATEST points here <==
