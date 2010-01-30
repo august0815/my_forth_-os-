@@ -169,7 +169,7 @@ clsexit:
 ; defword: printt  TESTED_OK
 ;
 ; prints an string of len , pointer to string
-defword "printt", printt,0
+defword "printt1", printt1,0
 	        dd DECR
             LITN 0                  
             do
@@ -256,4 +256,4 @@ SEE3:	dd	DUP,FETCH,UDOT		;display number
 SEE4:	dd PRESSKEY			;user control
 		zbranch SEE1
 		dd	DROP,EXIT		
-;%include "rest.s"
+%include "rest.s"

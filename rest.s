@@ -97,8 +97,38 @@ defword "PRESSKEY" , PRESSKEY ,0
             dd CLEAR
             dd EXIT		; EXIT		(return from FORTH word)	; function: ZEIL   TESTED_OK
 
-
-
+defword "show", show, 0
+  dd CR
+        dd CR
+        dd GRUB
+        dd FETCH
+        LITN 0x14
+        dd ADD
+        dd FETCH ,DOTS ,CR
+        dd GRUB
+        dd FETCH
+        LITN 0x18
+        dd ADD
+        dd FETCH,DOTS ,CR
+        dd DUP
+        dd FETCH
+        dd SWAP
+        dd INCR4
+        dd FETCH ,DOTS ,CR
+        dd SWAP
+        dd TWODUP
+        dd SUB
+        dd NROT
+        dd DROP ,DOTS ,CR
+        dd printt
+        LITN text_buffer
+        dd text_buff
+        dd STORE
+        LITN 1 
+        dd text_buff
+        dd FETCH
+        dd STOREBYTE
+dd EXIT
 
 ; function: WELCOME must be the LAST WORD !! LATEST points here <==
 wel:
@@ -107,6 +137,7 @@ defword "WELCOM", WELCOM ,0
 			dd DUP
             dd PPTR_LAST , STORE
 			dd PPTR , STORE
+			
 			dd CLEAR
             dd CR
 			dd CR

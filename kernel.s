@@ -24,8 +24,12 @@ defvar "CONTEXT" , CONTEXT , 0, 0
 defvar "IMMED" , IMMED , 0, 0
 defvar "LENTEILW", LENTEILW , 0, 0
 defvar "PPTR_LAST", PPTR_LAST, 0 , 0
+defvar "GRUB", GRUB, 0, 0
+global var_GRUB
+defvar "text_buff", text_buff, 0 ,0
 ; Assembly Entry point
 section .text
+extern module
 GLOBAL main
 main:
 			mov [var_S0],esp 			; Save the initial data stack pointer in FORTH variable S0.
@@ -47,11 +51,8 @@ section .rodata
 cold_start: 
 			dd WELCOM
 			dd CLEAR 
-mes:        dd MES1
-			
-			dd CLEAR
-			dd PRESSKEY
-			dd MES2
+mes:        dd MES2
+			dd show ,CR
 int: 			 	 
 			dd ZEIL
         	branch int

@@ -41,11 +41,11 @@ global start                    ; Grub entry point.
 extern main                     ; This is the entry point of our C code
 extern gdt_flush
 global start
-global module
+extern var_GRUB
 ; function: start
 ;   Entry point for grub.
 start:
-        mov dword [module],ebx             ; Load multiboot header location
+        mov dword [var_GRUB],ebx            ; Load multiboot header location
         push ebx
         cli                     ; Disable interrupts.
         call gdt_flush          ; Initialize GDT
@@ -53,5 +53,5 @@ start:
         jmp $                   ; Enter an infinite loop, to stop the processor
                                 ; executing whatever rubbish is in the memory
                                 ; after our kernel! 
-module: dd 0
+
 

@@ -6,7 +6,7 @@
 ;
 ; remove not used code
 section .text
-defvar "text_buff", text_buff, 0 ,0
+
 ; function: ZEILE  ; einlesen einer Zeile bis CR   TESTED_OK
 ;
 ; edi  push base address
@@ -414,7 +414,17 @@ defcode "INTERPRET",INTERPRET,0
 	mov	dword [var_TST] ,0xffff
 	NEXT
 
-
+; defword: printt  TESTED_OK
+;
+; prints an string of len , pointer to string
+defword "printt", printt, 0
+ 	dd DECR 
+ 	LITN 0
+    do
+  		dd 	NROT , DUP,FETCH ,EMIT, INCR , ROT
+ 	loop
+ 	dd DROP
+ 	dd EXIT
             
 defword "inter" , inter ,0	
  			LITN 0
@@ -445,7 +455,7 @@ inter1:	    dd INTERPRET
 			 	dd PRINTCSTRING 
 			 	dd PPTR_LAST,FETCH
 			 	LITN 6 ;dd LENTEILW ,FETCH
-			 	dd PRINTCSTRING
+			 	dd printt
 			 	dd CR ;dd PRESSKEY
 			 	LITN 15
 			 	dd INK
@@ -479,4 +489,4 @@ defword "ZEIL" , ZEIL ,0
         ;  clsstack drop
  			dd EXIT		; EXIT		(return from FORTH word)
 
-%include "rest.s"
+%include "ext1.s"

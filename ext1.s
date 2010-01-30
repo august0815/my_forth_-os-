@@ -124,4 +124,4 @@ defword "HEX",HEX,0
 	dd BASE ,STORE
 	dd EXIT		; EXIT		(return from FORTH word)
 
-;%include "ext2.s"
+%include "ext2.s"

@@ -423,5 +423,4 @@ _KEY1:
 ;|	THEN
 ;|		begin
 
-
-;%include "ext3.s"
+%include "ext3.s"
