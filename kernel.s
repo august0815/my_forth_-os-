@@ -55,7 +55,7 @@ cold_start:
 			dd WELCOM
 			dd CLEAR 
 ;mes:        
-			dd show ,CR
+			dd compile,CR
 int: 			 	 
 			dd ZEIL
         	branch int

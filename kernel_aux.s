@@ -73,21 +73,21 @@ defword "PRESSKEY" , PRESSKEY ,0
             dd getchar
             dd CLEAR
             dd EXIT		; EXIT		(return from FORTH word)	; function: ZEIL   TESTED_OK
-
-defword "show", show, 0
+; funktion: compile        
+defword "compile", compile, 0
   dd CR
         dd CR
-        dd GRUB
-        dd FETCH
-        LITN 0x14
+        dd GRUB   		
+        dd FETCH		; 
+        LITN 0x14		;
         dd ADD
         dd FETCH 
-        dd GRUB
+        dd GRUB			; GRUB  @  . 0x18 + @ : the pointer to startadress of grubheader
         dd FETCH
         LITN 0x18
         dd ADD
         dd FETCH
-        dd DUP
+        dd DUP			;   dup @ swap 4+ @   swap    starting_adr, end_adr 
         dd FETCH
         dd SWAP
         dd INCR4 
@@ -95,21 +95,19 @@ defword "show", show, 0
         dd SWAP
         dd TWODUP
         dd SUB
-        dd NROT , INCR
+        dd NROT 		
         dd SRC_END
         dd STORE
         LITN 0
-        dd SRC_END ,STOREBYTE
+        dd SRC_END ,STOREBYTE ; Store 0 (EOF ) TO  SRC_END
         dd SWAP
         dd DUP
-        dd SRC
+        dd SRC		
         dd STORE
         dd SWAP
         dd TWODROP
         dd DROP
         dd interforth
-        dd DROP 
-        dd printt
         LITN text_buffer
         dd text_buff
         dd STORE

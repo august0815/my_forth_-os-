@@ -531,7 +531,7 @@
 
 
 
-echoon ;
+
 
 : STRLEN 	( str -- len )
 	DUP		( save start address )
@@ -562,11 +562,13 @@ echoon ;
 	-
 	4 /		( returns number of cells )
 ;
-
+echoon ;
 
 : WEL
 	
 	." OK" CR
 	
 ;
-echoon ;
+
+1000 . ;
+
