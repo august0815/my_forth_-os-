@@ -449,7 +449,11 @@ defword "printt", printt, 0
  	loop
  	dd DROP
  	dd EXIT
-            
+ 
+; function: inter
+; ( -- )    
+;| the interpreter loop
+;| tests for  'INTERPRET' errors and shows the result of interpret/compile   
 defword "inter" , inter ,0	
  			LITN 0
 			dd TST , STORE
@@ -502,8 +506,12 @@ next1:		LITN 0
 			dd TST , STORE  ;clear Error_flag
             dd TST1 , STORE ;clear End_of_Line fla
             
-			dd EXIT  
-
+			dd EXIT
+			  
+; function: ZEIL
+; ( -- )
+;| reads stream of char to text_buffer
+;| until 'CR' is hit 
 defword "ZEIL" , ZEIL ,0
        	LITN text_buffer
         dd DUP
@@ -522,13 +530,21 @@ defword "ZEIL" , ZEIL ,0
  			dd EXIT		; EXIT		(return from FORTH word)
 
 
-
+; function: linecopy 
+; ( -- )
+;| reads from source until ';' char is found in stream
+;| replace in the stream
+;| 'lf'  with SPACE
+;| 'tab' with SPACE
+;| if ';' is found then 'CR' an 0 is added (to text_buffer) 
+;| this simulates an keyboard input with 'CR' , so the interpreter will
+;| compile the word   
 defword "linecopy" , linecopy ,0
-	dd DUP, FETCHBYTE  ; IF LF am Anfang der Zeile 
+	dd DUP, FETCHBYTE 	 ; IF LF is the first char
 	LITN 0x0a
 	dd EQU
 	if 
-	branch lf
+	branch lf			; goto lf	
 	then
 	
 	begin
@@ -579,59 +595,50 @@ lf:	LITN 0xd
 	dd FETCH
 	dd STOREBYTE
 	dd EXIT
+	
+; function: interforth
+; ( -- )
+;| compiles the loaded ( via GRUB) file
 
 defword "interforth" ,interforth ,0
-;dd DECIMAL
-	dd SRC ,FETCH
-	dd FILP
-	dd STORE
-	LITN text_buffer
-	dd PPTR , STORE
+	dd echooff
+	dd SRC, FETCH    	; source
+	dd FILP, STORE		; file_position_pointer
+	LITN text_buffer	; 
+	dd PPTR , STORE		; input_line_source_pointer
 	
 lop:dd FILP	,FETCH	
     dd linecopy
 	
 	LITN text_buffer
 	dd PPTR , STORE
- 	 dd NOECHO ,FETCH
+ 	dd NOECHO ,FETCH
 	dd  ZNEQU
 	if
 	dd CR,CR
 	 LITN text_buffer
 	 dd PRINTCSTRING
-	 ;dd PRESSKEY
-	;dd PRESSKEY
 	then
-	;dd EXIT
-	;LITN zeile_buffer
-	;dd PPTR , STORE
 	
-dd inter
-          	LITN text_buffer
-			dd DUP
-            dd PPTR_LAST , STORE
-			dd PPTR , STORE
-            ;dd CLEAR
-            ;dd CLSSTACK
-           ; dd DROP	
-
+	dd inter
+    LITN text_buffer
+	dd DUP
+    dd PPTR_LAST , STORE ; remember the last word witch compiled without error
+	dd PPTR , STORE
+    
 	LITN 1
-	dd  FILP
-	dd ADDSTORE
-	dd FILP ,FETCH
-	dd FETCHBYTE;test ob EOF
+	dd  FILP , ADDSTORE 
+	dd FILP ,FETCH		; is next char = 0
+	dd FETCHBYTE 		; then it is  EOF
 	dd QDUP
 	if 
 	 	LITN -1
-		dd  FILP
+		dd  FILP		; no , go for next line_input
 		dd ADDSTORE
 	 
 	else
-	 branch fertig
+	 branch fertig		; yes , EOF 
 	then
-	
-	
-	;dd PRESSKEY	
 	branch lop	
 	
 fertig:	dd EXIT

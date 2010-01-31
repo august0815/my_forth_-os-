@@ -9,6 +9,7 @@
 	' LIT ,
 	,
 	;
+	
 : ':'
 	[
 	CHAR :
@@ -266,16 +267,7 @@
 	@    		( and fetch )
 ;
 
-( With the looping constructs, we can now write SPACES, which writes n spaces to stdout. )
-: SPACES	( n -- )
-	BEGIN
-		DUP 0>		( while n > 0 )
-	WHILE
-		SPACE		( print a space )
-		1-		( until we count down to 0 )
-	REPEAT
-	DROP
-;
+
 
 ( c a b WITHIN returns true if a <= c and c < b )
 (  or define without ifs: OVER - >R - R>  U<  )
@@ -535,20 +527,11 @@
 ;
 
 
-: :NONAME
-	0 0 CREATE	( create a word with no name - we need a dictionary header because  expects it )
-	HERE @		( current HERE value is the address of the codeword, ie. the xt )
-	DOCOL ,		( compile DOCOL (the codeword) )
-	]		( go into compile mode )
-;
-
-: ['] IMMEDIATE
-	' LIT ,		( compile LIT )
-;
 
 
 
 
+echoon ;
 
 : STRLEN 	( str -- len )
 	DUP		( save start address )
@@ -582,16 +565,8 @@
 
 
 : WEL
-	." BB4Wforth version " VERSION .
-	."  adapted from Jonesforth version " VERSION . CR
-	." Corrections and additions "
-	." by Richard Russell, 19-Oct-2009" CR
-	( UNUSED . ." cells remaining" CR )
+	
 	." OK" CR
 	
 ;
-
-
-
-
-
+echoon ;
