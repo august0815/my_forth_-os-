@@ -249,7 +249,7 @@ defcode "]",RBRAC,0
 	mov dword [var_STATE],1	; Set STATE to 1.
 	NEXT
 
-; function: ":"   TESTED_OK
+; function: :   
 defword ":" , COLON  ,0
 	dd TEILWORT		; Get the name of the new word
     dd CREATE		; CREATE the dictionary entry / header
@@ -258,14 +258,17 @@ defword ":" , COLON  ,0
 	dd RBRAC		; Go into compile mode.
 	dd EXIT		; Return from the function.
 
-; function: ;     TESTED_OK 
+; function: ;
 defword ";",SEMICOLON,F_IMMED 
-	dd LIT, EXIT, COMMA	; Append EXIT (so the word will return).
-	dd LATEST, FETCH, HIDDEN ; Toggle hidden flag -- unhide the word (see below for definition).
-	dd LBRAC		; Go back to IMMEDIATE mode.
-	dd EXIT		; Return from the function.
+	dd STATE , FETCH
+	if
+	dd LIT, EXIT, COMMA			; Append EXIT (so the word will return).
+	dd LATEST, FETCH, HIDDEN 	; Toggle hidden flag -- unhide the word (see below for definition).
+	dd LBRAC					; Go back to IMMEDIATE mode.
+	then
+	dd EXIT						; Return from the function.
 
-; function: IMMEDIATE  not tested
+; function: IMMEDIATE  TESTED_OK
 defcode "IMMEDIATE" , IMMEDIATE , F_IMMED
 	mov edi,[var_LATEST]	; LATEST word.
 	add edi,4		; Point to name/flags byte.
