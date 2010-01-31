@@ -97,3 +97,5 @@ point_HERE: resb 2048
 
 point: resb 363748
 top: resb 0
+point2: resb 363748
+top2: resb 0

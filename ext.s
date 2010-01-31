@@ -52,6 +52,21 @@ text_buffer: times 1024 db 0
   
 section .text
 
+
+defcode "KEY1",KEY1  ,0
+	xor eax,eax
+	call _KEY1
+	push eax
+	NEXT
+_KEY1:
+	push ebx
+	mov ebx,[var_PPTR]
+	mov al,[ebx] 
+	inc ebx
+	mov dword [var_PPTR],ebx
+	pop ebx
+	ret
+	dd EXIT		; EXIT		(return from FORTH word)
 	
 ; function:  NUMBER  TESTED_OK
 ;
@@ -617,4 +632,5 @@ dd inter
 	branch lop	
 	
 fertig:	dd EXIT
-%include "ext1.s"
+;%include "ext1.s"
+%include "rest.s"
