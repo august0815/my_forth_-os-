@@ -14,8 +14,8 @@
 defconst "SCREEN", SCREEN, 0, 0xB8000
 defvar "PPTR", PPTR, 0 , 0
 defvar "ISLIT", ISLIT, 0 , 0
-defvar "TST", TST, 0 , 0
-defvar "TST1", TST1, 0 , 0
+defvar "END_OF_LINE", END_OF_LINE, 0 , 0
+defvar "PARS_ERROR", PARS_ERROR, 0 , 0
 defvar "TFFA" , TFFA , 0, 0
 defvar "TNFA" , TNFA , 0, 0
 defvar "RR" , RR , 0, 0
@@ -37,7 +37,7 @@ GLOBAL main
 main:
 			mov [var_S0],esp 			; Save the initial data stack pointer in FORTH variable S0.
             mov ebp, return_stack_top   ; init the return stack
-            mov	dword [var_TST],0
+            mov	dword [var_END_OF_LINE],0
             mov dword [var_STATE],0
             ;mov eax,[label_ENDE]
             ;mov dword[var_LATEST],eax

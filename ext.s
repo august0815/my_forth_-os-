@@ -330,7 +330,7 @@ _tlwd:
 	mov al,[ebx] ;_KEY		; get next key, returned in %eax
 	test al,al
 	jnz .5
-	mov dword [var_TST1],0xffff
+	mov dword [var_PARS_ERROR],0xffff
 	ret
 .5:	inc ebx
 	cmp al,'\'		; start of a comment?
@@ -368,7 +368,7 @@ ptr_buff: times 256 db 0
 section .text
 ;defcode: INTERPRET    better now 
 defcode "INTERPRET",INTERPRET,0  
-	mov	dword [var_TST],0	
+	mov	dword [var_END_OF_LINE],0	
 	call _tlwd ; Returns %ecx = length, %edi = pointer to word.
 	; Is it in the dictionary?
 	xor eax,eax
@@ -429,7 +429,7 @@ defcode "INTERPRET",INTERPRET,0
 .6:	; Parse error (not a known word or a number in the current BASE).
 	; Print an error message followed by up to 40 characters of context.
 	;mov ebx,2		; 1st param: stderr
-	mov	dword [var_TST] ,0xffff
+	mov	dword [var_END_OF_LINE] ,0xffff
 	NEXT
 
 defcode "CHAR", CHAR, 0
@@ -456,14 +456,14 @@ defword "printt", printt, 0
 ;| tests for  'INTERPRET' errors and shows the result of interpret/compile   
 defword "inter" , inter ,0	
  			LITN 0
-			dd TST , STORE
+			dd END_OF_LINE , STORE
 			dd NOECHO ,FETCH
 			dd  ZNEQU
 			if
 			dd CR
 			then
 inter1:	    dd INTERPRET
-			dd TST1,FETCH    ; endof line Interprt was OK
+			dd PARS_ERROR,FETCH    ; endof line Interprt was OK
  			dd ZNEQU
 			if
 				dd NOECHO ,FETCH
@@ -476,7 +476,7 @@ inter1:	    dd INTERPRET
 			 	then
 				branch next1
 			then	 
-			dd TST,FETCH      ; error in einput stream
+			dd END_OF_LINE,FETCH      ; error in einput stream
  			dd ZNEQU
 			if  	
 				dd CR
@@ -503,8 +503,8 @@ inter1:	    dd INTERPRET
 			branch inter1
 next1:		LITN 0
             dd DUP
-			dd TST , STORE  ;clear Error_flag
-            dd TST1 , STORE ;clear End_of_Line fla
+			dd END_OF_LINE , STORE  ;clear Error_flag
+            dd PARS_ERROR , STORE ;clear End_of_Line fla
             
 			dd EXIT
 			  
