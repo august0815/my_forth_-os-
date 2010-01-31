@@ -1,4 +1,4 @@
-FORTHOS
+"MY-FORTHOS"
 
 (A forth interpreter as a operative system.) Standalone forth interpreter.
 
@@ -17,6 +17,13 @@ Only for learning and hobby.
 My intention was to learn nasm and forth basics and NaturalDocs.
 The forth is not very usefull. There is no floppy acces , no memory menager,   no ports  etc.... available.
 I think it is only for learning.
+
+Added : Now  grub loads the file forth.f as an 'module' to memory.
+		with some simple compiling loops it is now  possible to get an more powerfull 
+		standalone forth.
+		Still some bugs
+forth.f : Is the file jonesforth.f without '\' comments and some words deleted.
+		  Still bugs .
 
 Thats it.
 

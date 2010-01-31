@@ -5,38 +5,6 @@
 ; 01.12.2009
 
 
-; function: MES1   TESTED_OK
-defword "MES1",MES1,0
-			dd CR
-            LITN 79             ; for i = 0 to 80*25
-            LITN 0                  
-            do
- 			LITN '*'
- 			dd EMIT
- 			loop
- 			dd CR
-            LITN  outputmes
-            dd PRINTCSTRING
-            dd CR
-            dd EXIT		; EXIT		(return from FORTH word)
-                       
-; function: MES2   TESTED_OK
-defword "MES2",MES2,0   
-			dd CR
-            LITN 79             ; for i = 0 to 80*25
-            LITN 0                  
-            do
- 			LITN '*'
- 			dd EMIT
- 			loop
- 			dd CR
-            LITN  inputloop
-            dd PRINTCSTRING
-            dd CR
-            
-            
-dd EXIT		; EXIT		(return from FORTH word) 
-          
 ; function: ZEILEMIT    TESTED_OK
 defword "ZEILEMIT",ZEILEMIT,0
             dd CR

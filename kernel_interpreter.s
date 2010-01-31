@@ -1,10 +1,9 @@
-; file: ext
+; file: interpreter
 ; by august0815
-; 19.12.2009
+;| 30.01.2010
 
-; TODO clean up 
-;
-; remove not used code
+;| TODO clean up 
+;| remove not used code
 section .text
 
 ; function: ZEILE  ; einlesen einer Zeile bis CR   TESTED_OK
@@ -642,5 +641,5 @@ lop:dd FILP	,FETCH
 	branch lop	
 	
 fertig:	dd EXIT
-;%include "ext1.s"
-%include "rest.s"
+
+%include "kernel_aux.s"

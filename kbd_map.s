@@ -55,4 +55,4 @@ keymap:
     db      0,0,0,0,         0,0,0,0,        0,0,0,0,       0,0,0,0
     db      0,0,0,0,         0,0,0,0,        0,0,0,0,       0,0,0,0
 
-%include "ext.s"
+%include  "kernel_interpreter.s"

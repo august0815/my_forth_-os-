@@ -54,7 +54,7 @@ section .rodata
 cold_start: 
 			dd WELCOM
 			dd CLEAR 
-mes:        dd MES2
+;mes:        
 			dd show ,CR
 int: 			 	 
 			dd ZEIL
