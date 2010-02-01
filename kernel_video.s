@@ -273,13 +273,20 @@ defword  "emitcw", emitcw, 0
         dd EXIT
 
 ; function: emit
-;   Prinst a character.
+;   Prinst a character. (only if char on stack is ascii)
 ;
 ; Stack:
 ;   char --
 defword  "EMIT", EMIT, 0
+		dd DUP
+		LITN ' '
+		dd LT
+		if
+		drop
+		else
         dd char_to_charword
         dd emitcw
+        then
         dd EXIT
 
 ; function: printcstring
