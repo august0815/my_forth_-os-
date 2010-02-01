@@ -24,7 +24,18 @@ defword  "zeile", zeile, 0
        		dd TAB
        		branch repn
         then
-                
+        dd DUP
+        LITN 0x08 	;BS backspace
+        dd EQU
+        if 
+        	dd DROP
+       		dd cursor_back ; del the char
+       		LITN ' ' 
+       		dd EMIT
+       		dd cursor_back  ; the position on back !
+       		dd DECR		   	; position of text_buffer(input) on back 
+       		branch repn
+        then        
         dd DUP
         LITN 0x0D
         dd EQU
