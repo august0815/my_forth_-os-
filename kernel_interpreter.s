@@ -17,7 +17,14 @@ defword  "zeile", zeile, 0
         while
         dd getchar 
         dd DUP
-        dd EMIT
+        LITN 0x09 	;TAB
+        dd EQU
+        if 
+        	dd DROP
+       		dd TAB
+       		branch repn
+        then
+                
         dd DUP
         LITN 0x0D
         dd EQU
@@ -38,14 +45,16 @@ defword  "zeile", zeile, 0
         dd DROP
         dd EXIT
         then
-         dd  
+        
+        dd DUP
+        dd EMIT 
         dd SWAP 
         dd DUP 
         dd INCR 
         dd ROT
         dd STOREBYTE 
-        LITN 1
-        repeat
+repn:   LITN 1
+	    repeat
         dd EXIT
 text_buffer: times 1024 db 0
   

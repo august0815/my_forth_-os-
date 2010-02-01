@@ -226,7 +226,24 @@ defword  "cursor_forward", cursor_forward, 0
         dd STORE
         dd screen_scroll_
         dd EXIT
-
+; function: cursor_back
+;   Moves the cursor back.
+;
+; Stack:
+;   --
+defword  "cursor_back", cursor_back, 0
+        LITN -1 
+        dd CURSOR_POS_X
+        dd FETCH
+        dd ADD
+        LITN 80 
+        dd DIVMOD
+        dd CURSOR_POS_Y
+        dd ADDSTORE
+        dd CURSOR_POS_X
+        dd STORE
+        dd screen_scroll_
+        dd EXIT
 ; function: c>cw, char_to_charword
 ;   Converts a character in a charword.
 ;
