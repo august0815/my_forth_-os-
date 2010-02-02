@@ -662,4 +662,20 @@ lop:dd FILP	,FETCH
 	
 fertig:	dd EXIT
 
+defword "?stack" , qstack ,0
+		dd S0 , FETCH
+		dd DSPFETCH , SUB
+		dd DECR4
+		dd dots
+		dd ZGE
+		if 
+		dd DROP
+		else
+		LITN stackerr
+		dd PRINTCSTRING
+		dd S0 , FETCH
+		dd DSPSTORE
+		then
+		
+dd EXIT
 %include "kernel_aux.s"

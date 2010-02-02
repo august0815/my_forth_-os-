@@ -58,6 +58,7 @@ cold_start:
 			dd compile,CR
 int: 			 	 
 			dd ZEIL
+			dd qstack
         	branch int
   		    dd STOP
    
@@ -76,6 +77,7 @@ errmsg: 		db 'PARSE ERROR: AT ->' ,0
 gef: 			db 'GEFUNDEN' , 0
 ngef: 			db 'NICHT IN TABELLE' , 0
 stackmes:		db 'STACK> ', 0
+stackerr:		db ' STACK undeflow .. reset STACK !' ,0
 in_key:         times 256 db 0
 
 ; stacks
