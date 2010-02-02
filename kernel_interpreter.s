@@ -349,7 +349,7 @@ _tlwd:
 	mov al,[ebx] ;_KEY		; get next key, returned in %eax
 	test al,al
 	jnz .5
-	mov dword [var_PARS_ERROR],0xffff
+	mov dword [var_END_OF_LINE],0xffff
 	ret
 .5:	inc ebx
 	cmp al,'\'		; start of a comment?
@@ -387,7 +387,7 @@ ptr_buff: times 256 db 0
 section .text
 ;defcode: INTERPRET    better now 
 defcode "INTERPRET",INTERPRET,0  
-	mov	dword [var_END_OF_LINE],0	
+	mov	dword [var_PARS_ERROR],0	
 	call _tlwd ; Returns %ecx = length, %edi = pointer to word.
 	; Is it in the dictionary?
 	xor eax,eax
@@ -448,7 +448,7 @@ defcode "INTERPRET",INTERPRET,0
 .6:	; Parse error (not a known word or a number in the current BASE).
 	; Print an error message followed by up to 40 characters of context.
 	;mov ebx,2		; 1st param: stderr
-	mov	dword [var_END_OF_LINE] ,0xffff
+	mov	dword [var_PARS_ERROR] ,0xffff
 	NEXT
 
 defcode "CHAR", CHAR, 0
@@ -468,7 +468,45 @@ defword "printt", printt, 0
  	loop
  	dd DROP
  	dd EXIT
- 
+defword "u.",udot,0
+	dd BASE, FETCH 	;( width rem quot )
+	dd DIVMOD		
+	dd QDUP
+	if 				;( if quotient <> 0 then )
+	 	dd udot
+	else
+	then
+		dd DUP		;( print the remainder )
+		LITN 10 
+		dd LT
+		if
+	 		LITN '0'  ;(decimal digits 0..9 )
+		else
+		LITN 10 
+	 	dd  SUB		;( hex and beyond digits A..Z )
+	 	LITN 'A'
+	 	then
+	 dd ADD
+	 dd EMIT	
+	 dd EXIT		; EXIT		(return from FORTH word)
+defword ".s"  , dots ,0
+	LITN '>'
+	dd EMIT
+	dd DSPFETCH ;( get current stack pointer )
+	begin
+		dd DUP 
+		dd S0 ,FETCH , LT
+	while
+		dd DUP ,FETCH 
+		dd udot ;( print the stack element )
+		dd spc
+		dd INCR4			 ;(move up )
+	repeat
+	dd DROP
+	LITN '<'
+	dd EMIT
+	dd EXIT		; EXIT		(return from FORTH word) 
+	
 ; function: inter
 ; ( -- )    
 ;| the interpreter loop
@@ -482,7 +520,7 @@ defword "inter" , inter ,0
 			dd CR
 			then
 inter1:	    dd INTERPRET
-			dd PARS_ERROR,FETCH    ; endof line Interprt was OK
+			dd END_OF_LINE,FETCH    ; endof line Interprt was OK
  			dd ZNEQU
 			if
 				dd NOECHO ,FETCH
@@ -493,9 +531,10 @@ inter1:	    dd INTERPRET
 				dd PRINTCSTRING
 			 	dd CR  	
 			 	then
+			 	
 				branch next1
 			then	 
-			dd END_OF_LINE,FETCH      ; error in einput stream
+			dd PARS_ERROR,FETCH      ; error in einput stream
  			dd ZNEQU
 			if  	
 				dd CR
@@ -654,10 +693,12 @@ lop:dd FILP	,FETCH
 	 	LITN -1
 		dd  FILP		; no , go for next line_input
 		dd ADDSTORE
-	 
+	 	;dd DROP
 	else
+	 ;dd DROP
 	 branch fertig		; yes , EOF 
 	then
+	;dd DROP
 	branch lop	
 	
 fertig:	dd EXIT
@@ -666,7 +707,6 @@ defword "?stack" , qstack ,0
 		dd S0 , FETCH
 		dd DSPFETCH , SUB
 		dd DECR4
-		dd dots
 		dd ZGE
 		if 
 		dd DROP

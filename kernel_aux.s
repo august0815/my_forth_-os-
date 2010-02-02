@@ -115,7 +115,8 @@ defword "compile", compile, 0
         dd text_buff
         dd FETCH
         dd STOREBYTE
-      
+        dd S0 , FETCH
+		dd DSPSTORE
 dd EXIT
 
 ; function: WELCOME must be the LAST WORD !! LATEST points here <==
