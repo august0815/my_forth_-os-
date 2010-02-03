@@ -553,7 +553,7 @@ inter1:	    dd INTERPRET
 			 	dd CR ;dd PRESSKEY
 			 	LITN 15
 			 	dd INK
-			 	dd PRESSKEY,DROP
+			 	dd PRESSKEY
 			 	branch next1
 			then	 
 			dd PPTR , FETCH 

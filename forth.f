@@ -225,27 +225,21 @@
 		1		( save a flag to remember that it was negative | width n 1 )
 		SWAP		( width 1 u )
 		ROT		( 1 u width )
-		1-		( 1 u width-1 )
+		( 1- )		( 1 u width-1 )
 	ELSE
 		0		( width u 0 )
 		SWAP		( width 0 u )
 		ROT		( 0 u width )
 	THEN
-	SWAP		( flag width u )
-	DUP		( flag width u u )
-	UWIDTH		( flag width u uwidth )
-	ROT		( flag u uwidth width )
-	SWAP -		( flag u width-uwidth )
-
-	SPACES		( flag u )
-	SWAP		( u flag )
-
+	SWAP	( flag width u )
+	DROP
+	0<>	
 	IF			( was it negative? print the - character )
 		'-' EMIT
 	THEN
 
 	U.
-;
+;	
 
 ( Finally we can define word . in terms of .R, with a trailing space. )
 : . 0 .R SPACE ;
@@ -304,53 +298,54 @@
 	1 HERE +!
 ;
 
-: S" IMMEDIATE
-	STATE @ IF
-		' LITSTRING ,
-		HERE @
-		0 ,
+: S" IMMEDIATE		( -- addr len )
+	STATE @ IF	( compiling? )
+		' LITSTRING ,	( compile LITSTRING )
+		HERE @		( save the address of the length word on the stack )
+		0 ,		( dummy length - we don't know what it is yet )
+		BEGIN
+			KEY1 		( get next character of the string )
+			DUP '"' <>
+		WHILE
+			C,		( copy character )
+		REPEAT
+		DROP		( drop the double quote character at the end )
+		DUP		( get the saved address of the length word )
+		HERE @ SWAP -	( calculate the length )
+		4-		( subtract 4 (because we measured from the start of the length word) )
+		SWAP !		( and back-fill the length location )
+		ALIGN		( round up to next multiple of 4 bytes for the remaining code )
+	ELSE		( immediate mode )
+		HERE @		( get the start address of the temporary space )
 		BEGIN
 			KEY1
-			DUP 22 <>
+			DUP '"' <>
 		WHILE
-			C,
+			OVER C!		( save next character )
+			1+		( increment address )
 		REPEAT
-		DROP
-		DUP	
-		HERE @ SWAP -
-		4-
-		SWAP !
-		ALIGN
-	ELSE
-		HERE @
-		BEGIN
-			KEY1
-			DUP 22 <>
-		WHILE
-			OVER C!
-			1+
-		REPEAT
-		DROP	
-		HERE @ -
-		HERE @
-		SWAP
+		DROP		( drop the final " character )
+		HERE @ -	( calculate the length )
+		HERE @		( push the start address )
+		SWAP 		( addr len )
 	THEN
 ;
-
-: ." IMMEDIATE
-	 STATE @ IF
-		[COMPILE] S"
-	' TELL , 
-	ELSE 
+: ." IMMEDIATE		( -- )
+	STATE @ IF	( compiling? )
+		[COMPILE] S"	( read the string, and compile LITSTRING, etc. )
+		' TELL ,	( compile the final TELL )
+	ELSE
+		( In immediate mode, just read characters and print them until we get
+		  to the ending double quote. )
 		BEGIN
 			KEY1
-			DUP 22 = IF
-				DROP
-				EXIT
+			DUP '"' = IF
+				DROP	( drop the double quote character )
+				EXIT	( return from this function )
 			THEN
 			EMIT
 		AGAIN
-	THEN 
+	THEN
 ;
 
 : CONSTANT
@@ -526,13 +521,6 @@
 	
 ;
 
-
-
-
-
-
-
-
 : STRLEN 	( str -- len )
 	DUP		( save start address )
 	BEGIN
@@ -562,13 +550,21 @@
 	-
 	4 /		( returns number of cells )
 ;
-echoon ;
+
 
 : WEL
-	
+	." MY-FORTH version " 1 .
+	."  adapted from Jonesforth version " VERSION . CR
+	." Corrections and additions "
+	." by august0815, 01-FEB-2010" CR
+	UNUSED . ." cells remaining" CR
 	." OK" CR
+
+
 	
 ;
-." TEST" ;
 
-1000 . ;
+IMMEDIATE ; 
+echoon ;
+WEL ;
+

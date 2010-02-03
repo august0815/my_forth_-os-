@@ -51,8 +51,9 @@ dd EXIT		; EXIT		(return from FORTH word)
 
 ; function: TELL   rewrite it !!!! still for linux
 defword "TELL" ,TELL , 0
-	dd EMIT, STOP
+	dd DROP, PRINTCSTRING ;printt
 	dd EXIT
+
 ; function: echooff   TESTED_OK
 defword "echooff" , echooff ,0
 			LITN 0
