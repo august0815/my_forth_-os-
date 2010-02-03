@@ -506,9 +506,6 @@
 			.
 		ENDOF
 		
-				
-		
-		ENDCASE
 			DUP	
 			CFA>
 			ID. SPACE
@@ -520,6 +517,7 @@
 	2DROP
 	
 ;
+
 
 : STRLEN 	( str -- len )
 	DUP		( save start address )
