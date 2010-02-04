@@ -132,6 +132,7 @@
 	REPEAT
 	DROP
 ;
+
 : CASE IMMEDIATE
 	0
 ;
@@ -204,7 +205,7 @@
 	SWAP		( width u )
 	DUP		( width u u )
 	UWIDTH		( width u uwidth )
-	ROT		( u uwidth width )
+	-ROT		( u uwidth width )
 	SWAP -		( u width-uwidth )
 	( At this point if the requested width is narrower, we'll have a negative number on the stack.
 	  Otherwise the number on the stack is the number of spaces to print.  But SPACES won't print
@@ -224,16 +225,22 @@
 		NEGATE		( width u )
 		1		( save a flag to remember that it was negative | width n 1 )
 		SWAP		( width 1 u )
-		ROT		( 1 u width )
-		( 1- )		( 1 u width-1 )
+		-ROT		( 1 u width )
+		1-		( 1 u width-1 )
 	ELSE
 		0		( width u 0 )
 		SWAP		( width 0 u )
-		ROT		( 0 u width )
+		-ROT		( 0 u width )
 	THEN
-	SWAP	( flag width u )
-	DROP
-	0<>	
+	SWAP		( flag width u )
+	DUP		( flag width u u )
+	UWIDTH		( flag width u uwidth )
+	-ROT		( flag u uwidth width )
+	SWAP -		( flag u width-uwidth )
+
+	SPACES		( flag u )
+	SWAP		( u flag )
+
 	IF			( was it negative? print the - character )
 		'-' EMIT
 	THEN
@@ -266,7 +273,7 @@
 ( c a b WITHIN returns true if a <= c and c < b )
 (  or define without ifs: OVER - >R - R>  U<  )
 : WITHIN
-	-ROT		( b c a )
+	ROT		( b c a )
 	OVER		( b c a c )
 	<= IF
 		> IF		( b c -- )
@@ -481,43 +488,131 @@
 ;
 
 : SEE
-	TEILWORT FIND
-	HERE @
+	TEILWORT
+	FIND
+	HERE @	
 	LATEST @	
 	BEGIN
-		2 PICK
+		2 PICK	
 		OVER
-		<>
+		<>	
 	WHILE
-		NIP
+		NIP	
 		DUP @
 	REPEAT
+
 	DROP
-	SWAP
-	59 EMIT SPACE DUP ID. SPACE
-	>DFA
-	BEGIN
-	2DUP >
+	SWAP	
+	':' EMIT SPACE DUP ID. SPACE
+	DUP ?IMMEDIATE IF ." IMMEDIATE " THEN
+
+	>DFA		
+	BEGIN	
+		2DUP >
 	WHILE
 		DUP @
+
 		CASE
 		' LIT OF
-			4 + DUP @
+			4 + DUP @	
 			.
 		ENDOF
-		
-			DUP	
-			CFA>
+		' LITSTRING OF	
+			[ CHAR S ] LITERAL EMIT '"' EMIT SPACE
+			4 + DUP @	
+			SWAP 4 + SWAP	
+			2DUP TELL	
+			'"' EMIT SPACE	
+			+ ALIGNED	
+			4 -	
+		ENDOF
+		' 0BRANCH OF
+			." 0BRANCH >"
+			4 + DUP @		
+			.
+			." < "
+		ENDOF
+		' BRANCH OF		
+			." BRANCH >"
+			4 + DUP @
+			.
+			." < "
+		ENDOF
+		' ' OF		
+			[ CHAR ' ] LITERAL EMIT SPACE
+			4 + DUP @		
+			CFA>	
 			ID. SPACE
+		ENDOF
+		' EXIT OF	
+				2DUP	
+			4 +	
+			<> IF	
+				." EXIT "
+			THEN
+		ENDOF
+					
+			DUP		
+			CFA>	
+			ID. SPACE		
 		ENDCASE
-	
-		4 +
+
+		4 +		
 	REPEAT
+
 	59 EMIT CR
-	2DROP
-	
+
+	2DROP		( restore stack )
 ;
 
+: DUMP
+	BASE @ ROT		( save the current BASE at the bottom of the stack )
+	HEX			( and switch to hexadecimal mode )
+
+	BEGIN
+		?DUP		( while len > 0 )
+	WHILE
+		OVER 8 .R	( print the address )
+		SPACE
+
+		2DUP	
+		1- 15 AND 1+
+		BEGIN
+			?DUP	
+		WHILE
+			SWAP
+			DUP C@	
+			2 .R SPACE	( print the byte )
+			1+ SWAP 1-	( addr len linelen addr -- addr len addr+1 linelen-1 )
+		REPEAT
+		DROP		( addr len )
+
+		( print the ASCII equivalents )
+		2DUP 1- 15 AND 1+ ( addr len addr linelen )
+		BEGIN
+			?DUP		( while linelen > 0)
+		WHILE
+			SWAP		( addr len linelen addr )
+			DUP C@		( addr len linelen addr byte )
+			DUP 32 128 WITHIN IF	( 32 <= c < 128? )
+				EMIT
+			ELSE
+				DROP '.' EMIT
+			THEN
+			1+ SWAP 1-	( addr len linelen addr -- addr len addr+1 linelen-1 )
+		REPEAT
+		DROP		( addr len )
+		CR
+
+		DUP 1- 15 AND 1+ ( addr len linelen )
+		TUCK		( addr linelen len linelen )
+		-		( addr linelen len-linelen )
+		>R + R>		( addr+linelen len-linelen )
+	REPEAT
+
+	DROP			( restore stack )
+	BASE !			( restore saved BASE )
+;
 
 : STRLEN 	( str -- len )
 	DUP		( save start address )
@@ -551,7 +646,7 @@
 
 
 : WEL
-	." MY-FORTH version " 1 .
+	CLEAR CR ." MY-FORTH version " 1 .
 	."  adapted from Jonesforth version " VERSION . CR
 	." Corrections and additions "
 	." by august0815, 01-FEB-2010" CR

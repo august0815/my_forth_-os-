@@ -9,6 +9,11 @@ on http://annexia.org/forth
 and in Bran's Kernel Development Tutorial, by Brandon Friesen at 
 http://www.osdever.net/bkerndev/Docs/title.htm
 
+Important: ROT and -ROT are swaped!! meens ROT  used in "http://annexia.org/forth" is now -ROT
+(see also  http://lambda-the-ultimate.org/node/2452   >>  
+"ROT reversed?"
+"Am I crazy, or is ROT/-ROT swapped compared to the standard (as in Starting Forth)?
+By kotlinski at Thu, 2009-01-15 10:38 ")
 
 Port to nasm started by jdinuncio (José Dinuncio)
 
