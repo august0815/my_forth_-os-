@@ -713,8 +713,8 @@
 
 : WEL
 	CLEAR CR ." MY-FORTH version 0." 1 . 
-	."  adapted from Jonesforth version " VERSION . CR
-	." Corrections and additions by Richard Russell, 19-Oct-2009"
+	."  adapted from Jonesforth version 47"  CR
+	." Corrections and additions by Richard Russell, 19-Oct-2009 " CR
 	." adapted by august0815, 01-FEB-2010" CR
 	UNUSED . ." cells remaining" CR
 	
