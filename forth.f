@@ -1041,7 +1041,17 @@ SAVE_BASE ;
 
 RESTORE_BASE ;
 
+( ------------------------------------------------------------------ )
+( ------------------some tests-------------------------------------- )
+
+: MULT_TABLE  CR 11 1 DO   
+                      11 1 DO  
+                      		I J *  5 U.R  
+                      		LOOP
+                      CR LOOP ;
+
 
 IMMEDIATE ; 
 echoon ;
 WEL ;
+MULT_TABLE ;
