@@ -565,6 +565,22 @@
 	2DROP		( restore stack )
 ;
 
+: NONAME
+	0 0 CREATE	
+	HERE @	
+	DOCOL ,	
+	]
+;
+
+
+: ['] IMMEDIATE
+	' LIT ,		
+;
+: EXCEPTION-MARKER
+	RDROP
+	0
+;
+
 : DUMP
 	BASE @ ROT		( save the current BASE at the bottom of the stack )
 	HEX			( and switch to hexadecimal mode )

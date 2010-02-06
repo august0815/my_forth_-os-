@@ -9,6 +9,14 @@ on http://annexia.org/forth
 and in Bran's Kernel Development Tutorial, by Brandon Friesen at 
 http://www.osdever.net/bkerndev/Docs/title.htm
 
+and on BB4Wforth by Richard Russell, October 2009  http://www.rtrussell.co.uk/ (http://www.rtrussell.co.uk/bb4wforth.zip)
+	"The following standard Forth words, absent from Jonesforth, have been
+	added in (BB4Wforth) : M*  UM*  */MOD  U/MOD  UM/MOD  SM/MOD  FM/MOD  D+  D-
+	ROLL  R@  DO  ?DO  I  J  LEAVE  UNLOOP  LOOP  +LOOP   (->added in forth_words.s )
+	 <BUILDS  DOES>  ABS MAX  MIN  PAGE  AT-XY  MS  TYPE  INCLUDED  [CHAR]  2OVER  CELL+  CHARS
+	CHAR+  2!  2@  LSHIFT  RSHIFT  >BODY  MOVE  FILL  .(  C"  <#  #  #S  HOLD
+	SIGN  #>  DIGIT  >NUMBER  POSTPONE  EVALUATE  ACCEPT  2R>  2>R  CONVERT (-> added in forth.f) "
+
 Important: ROT and -ROT are swaped!! meens ROT  used in "http://annexia.org/forth" is now -ROT
 (see also  http://lambda-the-ultimate.org/node/2452   >>  
 "ROT reversed?"
