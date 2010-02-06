@@ -493,7 +493,237 @@ defword "N_BYTE", N_BYTE, 0
 defcode "EXECUTE", EXECUTE, 0
         pop eax
         jmp [eax]
+        
+;-------------This Code is taken from bb4wforth.f---see--README-------
+       
+defcode "D+",  Dadd, 0 ; Added by RTR
+        pop edx                 ; MS 32-bits
+        pop eax                 ; LS 32-bits (Forth is big-endian)
+        add dword [esp+4],eax
+        adc dword [esp],edx
+        NEXT
+         
+defcode "D-", Dsub,0 ; Added by RTR
+        pop edx                 ; MS 32-bits
+        pop eax                 ; LS 32-bits (Forth is big-endian)
+        sub dword [esp+4],eax
+        sbb dword [esp],edx
+        NEXT
 
+defcode "UM/MOD", UMdivmod , 0 ; Added by RTR (unsigned)
+        pop ebx
+        pop edx
+        pop eax
+        div ebx
+        push edx                ; push remainder
+        push eax                ; push quotient
+        NEXT
+        
+defcode "UM*",  Umul64 ,0  ; Added by RTR
+        pop eax
+        pop ebx
+        mul ebx                 ; unsigned multiply
+        push eax                ; LS 32 bits (Forth is big-endian)
+        push edx                ; MS 32 bits
+        NEXT 
+        
+defcode "R@", Rfetch, 0 ; Added by RTR
+        mov eax,[ebp]
+        push eax
+        NEXT  
+              
+defcode "M*", Mul64 ,0 ; Added by RTR
+        pop eax
+        pop ebx
+        imul ebx                ; signed multiply
+        push eax                ; LS 32 bits (Forth is big-endian)
+        push edx                ; MS 32 bits
+        NEXT
+        
+defcode "SM/REM", SMdivrem, 0 ; Added by RTR (signed)
+        pop ebx
+        pop edx
+        pop eax
+        idiv ebx
+        push edx                ; push remainder
+        push eax                ; push quotient
+        NEXT
+        
+defcode "FM/MOD", FMdivmod,0 ; Added by RTR (floored)
+        pop ebx
+        pop edx
+        pop eax
+        idiv ebx
+        or edx,edx
+        jz _fmmodx              ; No remainder
+        or eax,eax
+        jns _fmmodx             ; Quotient is positive
+        dec eax
+        add edx,ebx
+_fmmodx:
+        push edx                ; push remainder
+        push eax                ; push quotient
+        NEXT
+        
+defcode "*/", Muldiv,0 ; Added by RTR
+        pop ecx
+        pop ebx
+        pop eax
+        imul ebx
+        idiv ecx
+        push eax
+        NEXT
+        
+defcode "*/MOD", Muldivmod ,0 ; Added by RTR
+        pop ecx
+        pop ebx
+        pop eax
+        imul ebx
+        idiv ecx
+        push edx                ; push remainder
+        push eax                ; push quotient
+        NEXT
+        
+defcode "2*", Twomul, 0 ; Added by RTR
+        shl dword [esp],1
+        NEXT
+        
+defcode "2/", Twodiv, 0 ; Added by RTR
+        sar dword [esp],1
+        NEXT
+        
+defcode "U2/", Utwodiv,0 ; Added by RTR
+        shr dword [esp],1
+        NEXT
+
+defcode "U<", Ult,0 ; Added by RTR
+        pop eax
+        pop ebx
+        cmp ebx,eax
+        setb al
+        movzx eax,al
+        neg eax
+        push eax
+       NEXT
+  
+ defcode "U>", Ugt,0 ; Added by RTR
+        pop eax
+        pop ebx
+        cmp ebx,eax
+        seta al
+        movzx eax,al
+        neg eax
+        push eax
+       NEXT
+
+defcode "S>D", Stod,0   ; Added by RTR
+        pop eax
+        cdq
+        push eax                ; LS 32 bits (Forth is big-endian)
+        push edx                ; MS 32 bits
+       NEXT
+        
+defcode "ROLL", Roll,0 ; Added by RTR
+        pop ecx
+        jecxz _roll_next
+        lea edi,[esp+ecx*4]
+        lea ebx,[edi-4]
+        mov eax,[edi]
+        std
+        xchg esi,ebx
+        rep movsD
+        xchg esi,ebx
+        cld
+        mov [esp],eax
+_roll_next:
+       NEXT        
+
+defcode "dodoes", Dodoes, 0; Added by RTR
+_dodoes:
+        cmp dword [eax+4],0     ; Has DOES> been executed ?
+        jz _nodoes
+        lea ebp,[ebp-4]
+        mov [ebp],esi
+        mov esi,[eax+4]         ; Get pointer stored by DOES>
+_nodoes:
+        lea eax,[eax+8]
+        push eax                ; Push user data area address
+        NEXT
+        
+defcode "LEAVE", Leave ,0  ; Added by RTR
+        lea ebp,[ebp+12]        ; pop return stack
+        jmp _leave
+        
+defcode "?DO",  Qdo, 0 ; Added by RTR
+        pop ecx                 ; initial index
+        pop edx                 ; limit
+        cmp ecx,edx
+        jne _dogo
+_leave:
+        mov ecx,1
+        xor ebx,ebx
+_qdo_loop:
+        lodsd
+        cmp eax,Do              ; Nested loop ?
+        setz bl
+        add ecx,ebx
+        cmp eax,Qdo
+        setz bl
+        add ecx,ebx
+        cmp eax,Loop
+        setz bl
+        sub ecx,ebx
+        cmp eax,Ploop
+        setz bl
+        sub ecx,ebx
+        or ecx,ecx
+        jnz _qdo_loop
+        NEXT
+        
+defcode "DO",  Do, 0 ; Added by RTR
+        pop ecx                 ; initial index
+        pop edx                 ; limit
+_dogo:
+        lea ebp,[ebp-12]        ; make room on return stack
+        mov [ebp+8],esi
+        mov [ebp+4],edx
+        mov [ebp],ecx
+        NEXT
+        
+defcode"+LOOP", Ploop, 0 ; Added by RTR
+        pop eax                 ; step
+        jmp _loop_step
+        
+defcode "LOOP", Loop, 0 ; Added by RTR
+        mov eax,1               ; default step
+_loop_step:
+        ;test byte [bflags],&81
+        ;jnz near _escape        ; ESCape key pressed or Close
+        mov ebx,[ebp]           ; index
+        sub ebx,[ebp+4]         ; subtract limit
+        btc ebx,31              ; invert MSB
+        add ebx,eax             ; step
+        jo _unloop              ; overflow signals loop end
+        btc ebx,31              ; invert MSB again
+        add ebx,[ebp+4]         ; add limit back
+        mov [ebp],ebx           ; new index
+        mov esi,[ebp+8]
+        NEXT       ; continue looping
+        
+defcode "UNLOOP", Unloop, 0  ; Added by RTR
+_unloop:
+        lea ebp,[ebp+12]        ; pop return stack
+        NEXT       ; exit loop
+        
+defcode "I", I , 0 ; Added by RTR
+        push dword [ebp]        ; index
+        NEXT       ; exit loop
+        
+defcode "J", J, 0 ; Added by RTR
+        push dword [ebp+12]     ; outer index
+        NEXT       ; exit loop
+
+;-------------This Code is taken from bb4wforth.f---see--README-------
    
 
 %include "kernel_video.s"
