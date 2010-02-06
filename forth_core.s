@@ -80,6 +80,8 @@
             defvar "BASE", BASE, 0, 10
 			defvar "TOPMEM", TOPMEM, 0, top ; SYSCALL0 must be last in built-in dictionary
 			defvar "NOECHO", NOECHO, 0, 1 ; Flag if message is printed when compiling is succsesfull ??
+			defvar "text_buff", text_buff, 0 ,0
+			defvar "PPTR", PPTR, 0 , 0
 ;  Virtual Machine constants
 ; const: VERSION     Is the current version of this FORTH.
 

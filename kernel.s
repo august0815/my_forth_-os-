@@ -12,7 +12,7 @@
 
 [BITS 32]
 defconst "SCREEN", SCREEN, 0, 0xB8000
-defvar "PPTR", PPTR, 0 , 0
+
 defvar "ISLIT", ISLIT, 0 , 0
 defvar "END_OF_LINE", END_OF_LINE, 0 , 0
 defvar "PARS_ERROR", PARS_ERROR, 0 , 0
@@ -26,7 +26,7 @@ defvar "LENTEILW", LENTEILW , 0, 0
 defvar "PPTR_LAST", PPTR_LAST, 0 , 0
 defvar "GRUB", GRUB, 0, 0
 global var_GRUB
-defvar "text_buff", text_buff, 0 ,0
+
 defvar "SRC", SRC, 0 , 0
 defvar "SRC_END", SRC_END, 0 , 0
 defvar "FILP", FILP, 0 , 0
