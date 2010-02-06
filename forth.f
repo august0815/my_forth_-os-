@@ -581,6 +581,55 @@
 	0
 ;
 
+: CATCH	
+	DSP@ 4+ >R		
+	' EXCEPTION-MARKER 4+
+	>R
+	EXECUTE
+;
+
+: THROW		( n -- )
+	?DUP IF			
+		RSP@ 			( get return stack pointer )
+		BEGIN
+			DUP R0 4- <		
+		WHILE
+			DUP @			( get the return stack entry )
+			' EXCEPTION-MARKER 4+ = IF	( found the EXCEPTION-MARKER on the return stack )
+				4+			( skip the EXCEPTION-MARKER on the return stack )
+				RSP!			( restore the return stack pointer )
+
+				( Restore the parameter stack. )
+				DUP DUP DUP		( reserve some working space so the stack for this word
+							  doesn't coincide with the part of the stack being restored )
+				R>			
+				4-			( reserve space on the stack to store n )
+				SWAP OVER		( dsp n dsp )
+				!			( write n on the stack )
+				DSP! EXIT		( restore the parameter stack pointer, immediately exit )
+			THEN
+			4+
+		REPEAT
+
+		
+		DROP
+
+		CASE
+		0 1- OF	( ABORT )
+			." ABORTED" CR
+		ENDOF
+			( default case )
+			." UNCAUGHT THROW "
+			DUP . CR
+		ENDCASE
+		QUIT
+	THEN
+;
+
+: ABORT	
+	0 1- THROW
+;
+
 : DUMP
 	BASE @ ROT		( save the current BASE at the bottom of the stack )
 	HEX			( and switch to hexadecimal mode )

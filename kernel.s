@@ -56,10 +56,7 @@ cold_start:
 			dd CLEAR 
 ;mes:        
 			dd compile,CR
-int: 			 	 
-			dd ZEIL
-			dd qstack
-        	branch int
+			dd QUIT
   		    dd STOP
    
 interpret_is_lit db 0     

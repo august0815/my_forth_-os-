@@ -385,6 +385,14 @@ section .data			; NB: easier to fit in the .data section
 ptr_buff: times 256 db 0
 		
 section .text
+defword "QUIT",QUIT,0
+			dd  R0 , RSPSTORE
+int: 			 	 
+			dd ZEIL
+			dd qstack
+        	branch int
+  		    dd EXIT
+  		   
 ;defcode: INTERPRET    better now 
 defcode "INTERPRET",INTERPRET,0  
 	mov	dword [var_PARS_ERROR],0	

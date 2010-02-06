@@ -94,7 +94,7 @@
 ; const: F_LENMASK   The length mask in the flags/len byte.
 
             defconst "VERSION", VERSION, 0, 1
-            defconst "R0", R0, 0, 2
+            defconst "R0", R0, 0, return_stack_top
             defconst "DOCOL", __DOCOL, 0, DOCOL
             defconst "F_IMMED", __F_IMMED, 0, 0x80
             defconst "F_HIDDEN", __F_HIDDEN, 0, 0x20
