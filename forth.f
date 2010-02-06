@@ -488,6 +488,7 @@
 ;
 
 : SEE
+	CR
 	TEILWORT
 	FIND
 	HERE @	
@@ -711,14 +712,11 @@
 
 
 : WEL
-	CLEAR CR ." MY-FORTH version " 1 .
+	CLEAR CR ." MY-FORTH version 0." 1 . 
 	."  adapted from Jonesforth version " VERSION . CR
-	." Corrections and additions "
-	." by august0815, 01-FEB-2010" CR
+	." Corrections and additions by Richard Russell, 19-Oct-2009"
+	." adapted by august0815, 01-FEB-2010" CR
 	UNUSED . ." cells remaining" CR
-	." OK" CR
-
-
 	
 ;
 
@@ -890,8 +888,160 @@ IMMEDIATE ;
   THEN
 ; 
 
+\  see ftp://ccreweb.org/software/kforth/examples/ansi.4th
+\ ansi.4th
+\
+\ ANSI Terminal words for kForth
+\
+\ Copyright (c) 1999--2004 Krishna Myneni
+\ Creative Consulting for Research and Education
+\
+\ This software is provided under the terms of the GNU
+\ General Public License.
+\
+\ ====> Requires that the file strings.4th be included first
+\      (not now ! august0815)
+\ Revisions: 
+\    06-10-1999
+\    10-11-1999 force cursor to 0 0 on page define at-xy  KM
+\    01-23-2000 replaced char with [char] for ANS Forth compatibility KM
+\    08-29-2002 use 0,0 as top left for AT-XY in accord with ANS Forth  KM
+\    09-08-2004 added console query words provided by Charley Shattuck: 
+\                 AT-XY?  ROWS  COLS   
+\               Note that ROWS and COLS are also provided in gforth and PFE
+\    09-10-2004 added scrolling words -- CS
+\ Colors
+\ at moment many words 'foo'
+
+0 CONSTANT BLACK  ;
+1 CONSTANT RED ;
+2 CONSTANT GREEN ;
+3 CONSTANT YELLOW ;
+4 CONSTANT BLUE ;
+5 CONSTANT MAGENTA ;
+6 CONSTANT CYAN ;
+7 CONSTANT WHITE ;
+VARIABLE TMP_X ;
+VARIABLE TMP_Y ;
+
+VARIABLE ORIG_BASE ;
+
+: SAVE_BASE ( -- | STORE CURRENT BASE AND SET TO DECIMAL )
+	BASE @ ORIG_BASE ! 
+	DECIMAL ;
+
+: RESTORE_BASE ( -- | RESTORE ORIGINAL BASE )
+	ORIG_BASE @ BASE ! ;
+
+SAVE_BASE ;
+
+: ANSI_ESCAPE ( -- | OUTPUT ESCAPE CODE ) 
+	48 EMIT ;
+
+
+: CLRTOEOL ( -- | CLEAR TO END OF LINE )
+	49 EMIT ;
+
+: GOTOXY ( X Y -- | POSITION CURSOR AT COL X ROW Y, ORIGIN IS 1,1 )
+	SAVE_BASE
+	atx
+	RESTORE_BASE ;
+
+: AT-XY ( X Y -- |  ANS COMPATIBLE VERSION OF GOTOXY, ORIGIN IS 0,0 )
+	SAVE_BASE
+	atx
+	RESTORE_BASE ;
+
+: PAGE ( -- | CLEAR THE SCREEN AND PUT CURSOR AT TOP LEFT )
+	CLEAR ;
+
+: CUR_UP ( N -- | MOVE CURSOR UP BY N LINES )
+	SAVE_BASE  
+	60 EMIT
+	RESTORE_BASE ;
+
+: CUR_DOWN ( N -- | MOVE CURSOR DOWN BY N LINES )
+	SAVE_BASE 
+	61 EMIT 
+	RESTORE_BASE ;
+
+: CUR_LEFT ( N -- | MOVE CURSOR LEFT BY N COLUMNS )
+	SAVE_BASE
+	62 EMIT 
+	RESTORE_BASE ;
+
+: CUR_RIGHT ( N -- | MOVE CURSOR RIGHT BY N COLUMNS )
+	SAVE_BASE
+	63 EMIT 
+	RESTORE_BASE ;
+
+: SAVE_CURSOR ( -- | SAVE CURRENT CURSOR POSITION )
+	CURSOR_POS_X @ TMP_X ! CURSOR_POS_Y @ TMP_Y ! ;
+
+: RESTORE_CURSOR ( -- | RESTORE CURSOR TO PREVIOUSLY SAVED POSITION )
+	TMP_X @ CURSOR_POS_X !  TMP_Y @ CURSOR_POS_Y !  ;
+
+: FOREGROUND ( N -- | SET FOREGROUND COLOR TO N )
+	SAVE_BASE
+	INK
+	RESTORE_BASE ;
+
+: BACKGROUND ( N -- | SET BACKGROUND COLOR TO N )
+	SAVE_BASE
+	bg 
+	RESTORE_BASE ;
+
+: TEXT_NORMAL ( -- | SET NORMAL TEXT DISPLAY )
+	50 EMIT ;
+
+: TEXT_BOLD ( -- | SET BOLD TEXT )
+	51 EMIT ;
+
+: TEXT_UNDERLINE ( -- | SET UNDERLINED TEXT )
+	SAVE_BASE
+	51 EMIT
+	RESTORE_BASE ;
+
+: TEXT_BLINK ( -- | SET BLINKING TEXT )
+	SAVE_BASE
+	53 EMIT
+	RESTORE_BASE ;
+
+: TEXT_REVERSE ( -- | SET REVERSE VIDEO TEXT )
+	SAVE_BASE
+	54 EMIT
+	RESTORE_BASE ;  
+
+: READ-CDNUMBER  ( C - N | READ A NUMERIC ENTRY DELIMITED BY CHARACTER C)
+	>R 0 BEGIN
+		KEY1 DUP R@ - WHILE
+		SWAP 10 * SWAP [CHAR] 0 - +
+	REPEAT
+	R> 2DROP ;
+
+: AT-XY?  ( -- X Y | RETURN THE CURRENT CURSOR COORDINATES)
+	 CURSOR_POS_X @  CURSOR_POS_Y ;
+
+: ROWS  ( -- N | RETURN ROW SIZE OF CONSOLE) 
+    SAVE_CURSOR  0 100 AT-XY  AT-XY? NIP  RESTORE_CURSOR ;
+
+: COLS  ( -- N | RETURN COLUMN SIZE OF CONSOLE)
+    SAVE_CURSOR  200 0 AT-XY  AT-XY? DROP RESTORE_CURSOR ;  
+
+: RESET-SCROLLING  (  - )
+	55 EMIT ;
+
+: SCROLL-WINDOW  ( START END - )
+	56 EMIT ;
+
+: SCROLL-UP  (  - ) 57 EMIT ;
+
+: SCROLL-DOWN  (  - ) 58 EMIT ;
+
+
+RESTORE_BASE ;
+
 
 IMMEDIATE ; 
 echoon ;
 WEL ;
-
