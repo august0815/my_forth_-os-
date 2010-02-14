@@ -357,7 +357,7 @@
 
 : CONSTANT
 	TEILWORT		( get the name (the name follows CONSTANT) )
-	CREATE		( make the dictionary entry )
+	HEADER		( make the dictionary entry )
 	DOCOL ,		( append DOCOL (the codeword field of this word) )
 	' LIT ,		( append the codeword LIT )
 	,		( append the value on the top of the stack )
@@ -370,14 +370,14 @@
 : CELLS ( n -- n ) 4 * ;
 : VARIABLE
 	1 CELLS ALLOT	( allocate 1 cell of memory, push the pointer to this memory )
-	TEILWORT CREATE	( make the dictionary entry (the name follows VARIABLE) )
+	TEILWORT HEADER	( make the dictionary entry (the name follows VARIABLE) )
 	DOCOL ,		( append DOCOL (the codeword field of this word) )
 	' LIT ,		( append the codeword LIT )
 	,		( append the pointer to the new memory )
 	' EXIT ,	( append the codeword EXIT )
 ;
 : VALUE		( n -- )
-	TEILWORT CREATE	( make the dictionary entry (the name follows VALUE) )
+	TEILWORT HEADER	( make the dictionary entry (the name follows VALUE) )
 	DOCOL ,		( append DOCOL )
 	' LIT ,		( append the codeword LIT )
 	,		( append the initial value )
@@ -567,7 +567,7 @@
 ;
 
 : NONAME
-	0 0 CREATE	
+	0 0 HEADER	
 	HERE @	
 	DOCOL ,	
 	]
@@ -719,6 +719,8 @@
 	UNUSED . ." cells remaining" CR
 	
 ;
+4 CONSTANT CELL
+: NOOP ( -- ) ;  
 
 
 ( ----------------------------------------------------------------------- )
@@ -735,40 +737,52 @@
 : SOURCE text_buff @ DUP PPTR @ - ;
 : >IN PPTR @ ;
 : ALIAS
-  TEILWORT CREATE TEILWORT FIND >CFA @
+  TEILWORT HEADER TEILWORT FIND >CFA @
   DUP DOCOL = IF ." Cannot alias a non-code word" THEN
   ,
 ; 
-
+: CELL+ ( a-addr1 -- a-addr2 ) 1 CELLS + ;
+: CELL- ( a-addr1 -- a-addr2 ) 1 CELLS - ;
+: CHARS ( n1 -- n2 ) ;
 IMMEDIATE ;
 
-ALIAS (HERE) HERE
-( ALIAS (CREATE) CREATE )
-ALIAS (FIND) FIND
+ALIAS (HERE) HERE ;
 
-ALIAS (KEY) KEY1
+ALIAS (FIND) FIND ;
 
-HIDE DEPTH
-HIDE .S
-HIDE HERE
-HIDE ALLOT
-( HIDE CREATE )
-( HIDE VARIABLE )
-HIDE TRUE
-HIDE FIND
-HIDE WHILE
-HIDE REPEAT
+ALIAS (KEY) KEY1 ;
 
+HIDE DEPTH ;
+HIDE .S ;
+HIDE HERE ;
+HIDE ALLOT ;
 
-HIDE ' ( LIT is identical )
+HIDE TRUE ;
+HIDE FIND ;
+HIDE WHILE ;
+HIDE REPEAT ;
+
+( HIDE ' ( LIT is identical ) )
 
 
+: DOES> R> LATEST @ >DFA ! ; 
 : DEPTH ( -- +n ) S0 @ 4- DSP@ - 4 / ;
 : .S ( -- ) S0 @ DEPTH 1 ?DO 4- DUP @ . LOOP DROP ;
 : HERE ( -- addr ) (HERE) @ ;
 : ALLOT ( n -- ) HERE + (HERE) ! ;
-( CREATE ( "<spaces>name" -- ) TEILWORT (CREATE) dodoes , 0 ,  )
-( VARIABLE ( "<spaces>name" -- ) CREATE 1 CELLS ALLOT )
+
+echoon ;
+
+: CREATE ( "<spaces>name" -- ) 
+	1 CELLS ALLOT 	( HERE push the pointer to this memory )
+	TEILWORT HEADER	( make the dictionary entry  )
+	DOCOL ,		( append DOCOL (the codeword field of this word) )
+	' LIT ,		( append the codeword LIT )
+	,		( append the pointer to the new memory )
+	' EXIT , 	( append the codeword EXIT ) ;
+IMMEDIATE ;
+echooff ;
+
 : TRUE ( -- true ) -1 ;
 : COUNT ( caddr1 -- caddr2 u ) DUP C@ SWAP 1+ SWAP ;
 
@@ -812,8 +826,8 @@ IMMEDIATE ;
 : 2* ( n -- [n*2] ) DUP + ;
 : U2/ ( n -- [n/2] ) 1 SHR ;
 
-: <BUILDS TEILWORT CREATE dodoes , 0 , ;
-: DOES> R> LATEST @ >DFA ! ; 
+: <BUILDS TEILWORT HEADER dodoes , 0 , ;
+( DOES> R> LATEST @ >DFA ! ) 
 : >BODY ( xt -- a-addr ) 2 CELLS + ;
 
 : ABS ( n -- u ) DUP 0< IF NEGATE THEN ;
@@ -826,8 +840,6 @@ IMMEDIATE ;
 : [CHAR] ( "<spaces>name" -- ) CHAR ['] LIT , , ; 
 IMMEDIATE ;
 : 2OVER ( x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2 ) 3 PICK 3 PICK ;
-: CELL+ ( a-addr1 -- a-addr2 ) 1 CELLS + ;
-: CHARS ( n1 -- n2 ) ;
 : CHAR+ ( c-addr1 -- c-addr2 ) 1 CHARS + ;
 : 2! ( x1 x2 a-addr -- ) SWAP OVER ! CELL+ ! ;
 : 2@ ( a-addr -- x1 x2 ) DUP CELL+ @ SWAP @ ;
@@ -957,22 +969,22 @@ SAVE_BASE ;
 
 : CUR_UP ( N -- | MOVE CURSOR UP BY N LINES )
 	SAVE_BASE  
-	60 EMIT
+	CURSOR_POS_Y -!
 	RESTORE_BASE ;
 
 : CUR_DOWN ( N -- | MOVE CURSOR DOWN BY N LINES )
 	SAVE_BASE 
-	61 EMIT 
+	CURSOR_POS_Y +!
 	RESTORE_BASE ;
 
 : CUR_LEFT ( N -- | MOVE CURSOR LEFT BY N COLUMNS )
 	SAVE_BASE
-	62 EMIT 
+	cursor_back
 	RESTORE_BASE ;
 
 : CUR_RIGHT ( N -- | MOVE CURSOR RIGHT BY N COLUMNS )
 	SAVE_BASE
-	63 EMIT 
+	cursor_forward
 	RESTORE_BASE ;
 
 : SAVE_CURSOR ( -- | SAVE CURRENT CURSOR POSITION )
@@ -1020,13 +1032,13 @@ SAVE_BASE ;
 	R> 2DROP ;
 
 : AT-XY?  ( -- X Y | RETURN THE CURRENT CURSOR COORDINATES)
-	 CURSOR_POS_X @  CURSOR_POS_Y ;
+	 CURSOR_POS_X @  CURSOR_POS_Y @ ;
 
 : ROWS  ( -- N | RETURN ROW SIZE OF CONSOLE) 
-    SAVE_CURSOR  0 100 AT-XY  AT-XY? NIP  RESTORE_CURSOR ;
+   ( SAVE_CURSOR  0 100 AT-XY AT-XY? NIP RESTORE_CURSOR  ) 80 ;
 
 : COLS  ( -- N | RETURN COLUMN SIZE OF CONSOLE)
-    SAVE_CURSOR  200 0 AT-XY  AT-XY? DROP RESTORE_CURSOR ;  
+   ( SAVE_CURSOR  200 0 AT-XY  AT-XY? DROP RESTORE_CURSOR ) 24 ;  
 
 : RESET-SCROLLING  (  - )
 	55 EMIT ;
@@ -1051,7 +1063,69 @@ RESTORE_BASE ;
                       CR LOOP ;
 
 
+: /STRING ( A1 U1 N -- A2 U2 | ADJUST SIZE OF STRING BY N CHARACTERS)
+	DUP >R - SWAP R> + SWAP ;
+
+IMMEDIATE ; 
+: SEARCH-TABLE           ( N1 A1 N2 N3 -- N4 F)
+      SWAP >R            ( N1 A1 N3)
+      ROT ROT            ( N3 N1 A1)
+      OVER OVER          ( N3 N1 A1 N1 A1)
+      0                  ( N3 N1 A1 N1 A1 N2)
+      BEGIN              ( N3 N1 A1 N1 A1 N2)
+            SWAP OVER    ( N3 N1 A1 N1 N2 A1 N2)
+            CELLS +      ( N3 N1 A1 N1 N2 A2)
+            @ DUP        ( N3 N1 A1 N1 N2 N3 N3)
+            0> >R        ( N3 N1 A1 N1 N2 N3)
+            ROT <>       ( N3 N1 A1 N2 F)
+            R@ AND       ( N3 N1 A1 N2 F)
+      WHILE              ( N3 N1 A1 N2)
+            R> DROP      ( N3 N1 A1 N2)
+            R@ +         ( N3 N1 A1 N2+2)
+            >R OVER OVER ( N3 N1 A1 N1 A1)
+            R>           ( N3 N1 A1 N1 A1 N2+2)
+      REPEAT             ( N3 N1 A1 N2)
+      R@ IF
+            >R ROT R>    ( N1 A1 N3 N2)
+       + CELLS + @    ( N1 N4)
+       SWAP DROP      ( N3)
+  ELSE
+       DROP DROP DROP ( N1)
+  THEN
+  R>                  ( N F)
+  R> DROP             ( N F)
+;
+
+
+0 CONSTANT NULL
+3 CONSTANT MF
+
+CREATE MONTHTABLE ;
+      1 , S" JANUARY " , 31 , ;
+      2 , S" FEBRUARY " , 28 , ;
+      3 , S"   MARCH " , 31 , ; 
+      4 , S"   APRIL " , 30 , ;
+      5 , S"    MAY   " , 31 , ;
+      6 , S"   JUNE   " , 30 , ;
+      7 , S"   JULY   " , 31 , ;
+      8 , S" AUGUST " , 31 , ;
+      9 , S" SEPTEMBER" , 30 , ; 
+      10 , S" OCTOBER " , 31 , ;
+      11 , S" NOVEMBER " , 30 , ;
+      12 , S" DECEMBER " , 31 , ;
+      NULL , ;
+
+: SM MONTHTABLE MF 1 SEARCH-TABLE ;
+: GM        ( N --)
+      SM
+  IF                       \ IF MONTH IS FOUND
+        TYPE \ PRINT ITS NAME
+  ELSE                     \ IF MONTH IS NOT FOUND
+       DROP ." NOT FOUND"  \ DROP VALUE
+  THEN                     \ AND SHOW MESSAGE
+  CR
+;
+
+
 IMMEDIATE ; 
 echoon ;
-WEL ;
-MULT_TABLE ;

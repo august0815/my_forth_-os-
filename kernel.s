@@ -91,7 +91,9 @@ buffer:
 	resb BUFFER_SIZE
 
 align 4096
-
+pad: 
+	resb 1024
+align 1024	
 point_HERE: resb 2048
 
 point: resb 363748

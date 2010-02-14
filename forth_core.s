@@ -101,7 +101,7 @@
             defconst "F_IMMED", __F_IMMED, 0, 0x80
             defconst "F_HIDDEN", __F_HIDDEN, 0, 0x20
             defconst "F_LENMASK", __F_LENMASK, 0, 0x1f
-
+			defconst "PAD", __PAD, 0, pad
 
 section .text
 align 4

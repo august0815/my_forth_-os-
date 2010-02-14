@@ -221,8 +221,8 @@ defword ">DFA",TDFA,0
 	dd INCR4		; 4+		(add 4 to it to get to next word)
 	dd EXIT		; EXIT		(return from FORTH word)
 	
-; function: CREATE TESTED_OK
-defcode "CREATE", CREATE, 0
+; function: HEADER ; TESTED_OK
+defcode "HEADER", HEADER, 0
 	
     pop ecx		; %ecx = length
 	pop ebx		; %ebx = address of name
@@ -238,8 +238,8 @@ defcode "CREATE", CREATE, 0
 	mov esi,ebx		; %esi = word
 	rep movsb		; Copy the word
 	pop esi
-	add edi,3		; Align to next 4 byte boundary.
-	and edi,~3
+	 lea edi,[edi+3]         ; Align to next 4 byte boundary.
+     and edi,~3
 	
 	; Update LATEST and HERE.
 	mov  eax,[var_HERE]
@@ -247,14 +247,14 @@ defcode "CREATE", CREATE, 0
 	mov dword [var_HERE],edi
     NEXT
 
-
+     
 ; defcode; "," TESTED_OK
 	defcode "," ,COMMA ,0
 	pop eax		; Code pointer to store.
 	call _COMMA
 	NEXT
 _COMMA:
-  	 mov edi,[var_HERE]	; HERE
+  	mov edi,[var_HERE]	; HERE
 	stosd			; Store it.
 	mov dword [var_HERE],edi	; HERE
 	ret
@@ -271,7 +271,7 @@ defcode "]",RBRAC,0
 ; function: :   
 defword ":" , COLON  ,0
 	dd TEILWORT		; Get the name of the new word
-    dd CREATE		; CREATE the dictionary entry / header
+    dd HEADER		; HEADER the dictionary entry / header
 	dd LIT, DOCOL, COMMA	; Append DOCOL  (the codeword).
 	dd LATEST, FETCH, HIDDEN ; Make the word hidden (see below for definition).
 	dd RBRAC		; Go into compile mode.

@@ -636,10 +636,47 @@ defcode "ROLL", Roll,0 ; Added by RTR
         cld
         mov [esp],eax
 _roll_next:
-       NEXT        
+       NEXT  
+defcode "doLIST", doLIST, 0;             
+		call _doLIST
+		NEXT
+_doLIST:
+        PUSHRSP esi
+        pop     esi
+        NEXT
+		
 
-defcode "dodoes", Dodoes, 0; Added by RTR
+defcode  "doCREATE" , doCREATE ,0
+		;call _doCREATE
+		;NEXT
+_doCREATE:	
+		mov     edi,[var_LATEST] 
+        pop     edi
+        mov     eax,    [edi]
+        lea     ebx,    [edi + 4]
+        push    ebx
+        test    eax,    eax
+        jnz     .L1
+        NEXT
+.L1:
+        jmp     eax
+		ret
+
+defcode "dodoes", Dodoes, 0;
+__doCREATE:	; mov eax, [var_LATEST]
+       	LEA     eBP,[eBP - 4] ;Push HIP.
+        MOV     [ebp],esi
+        MOV     eSI,[eBX+4] ;NEW IP 
+        LEA     eAX,[eSI+4]
+        MOV     eSI,[eSI]
+        push eax
+        NEXT
+.L1:
+        jmp     eax
+
+defcode "dodoes1", Dodoes1, 0;
 _dodoes:
+		mov eax,[var_HERE]
         cmp dword [eax+4],0     ; Has DOES> been executed ?
         jz _nodoes
         lea ebp,[ebp-4]
@@ -649,7 +686,11 @@ _nodoes:
         lea eax,[eax+8]
         push eax                ; Push user data area address
         NEXT
-        
+defcode "lit",lit,0
+		mov eax,[var_LATEST]
+		NEXT      
+ 	
+                                
 defcode "LEAVE", Leave ,0  ; Added by RTR
         lea ebp,[ebp+12]        ; pop return stack
         jmp _leave
