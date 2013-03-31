@@ -29,7 +29,7 @@ image: kernel
 kernel.o: forth_words.s forth_core.s
 
 run: image
-	qemu  -fda floppy.img  
+	kvm  -fda floppy.img  
 
 # Generating documentation.
 # Be sure to add "s" to "Extensions:" in "Language: Assembly"

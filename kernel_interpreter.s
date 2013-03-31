@@ -223,30 +223,25 @@ defword ">DFA",TDFA,0
 	
 ; function: HEADER ; TESTED_OK
 defcode "HEADER", HEADER, 0
-	
-    pop ecx		; %ecx = length
-	pop ebx		; %ebx = address of name
-	; Link pointer.
-	mov  edi,[var_HERE]	; %edi is the address of the header
-	mov  eax,[var_LATEST]	; Get link pointer
-	
-	stosd			; and store it in the header.
-	; Length byte and the word itself.
-	mov al,cl		; Get the length.
-	stosb			; Store the length/flags byte.
-	push esi
-	mov esi,ebx		; %esi = word
-	rep movsb		; Copy the word
-	pop esi
-	 lea edi,[edi+3]         ; Align to next 4 byte boundary.
-     and edi,~3
-	
-	; Update LATEST and HERE.
-	mov  eax,[var_HERE]
-	mov dword [var_LATEST], eax
-	mov dword [var_HERE],edi
-    NEXT
-
+	    pop     ecx             ; rcx = length
+        pop     edx             ; rdx = address of name
+        mov     edi,    [var_HERE]
+        mov     eax,    [var_LATEST]
+        stosd                   ; link を設定
+        ;xor     eax,    eax
+        ;stosb                   ; flags を設定
+        mov     al,     cl
+        stosb                   ; length を設定
+        push    esi             ; rsi 退避
+        mov     esi,    edx     ; address of name
+        rep     movsb           ; name を設定
+        pop     esi             ; rsi 復元
+       lea edi,[edi+3]  ; add     edi,    3      ; align 8
+        and     edi,    ~3
+        mov     eax,    [var_HERE]
+        mov     [var_LATEST],   eax
+        mov     [var_HERE],     edi
+        NEXT
      
 ; defcode; "," TESTED_OK
 	defcode "," ,COMMA ,0
@@ -584,7 +579,7 @@ defword "ZEIL" , ZEIL ,0
         dd text_buff
         dd STORE 
         dd zeile
-       ; dd ZEILEMIT 
+        dd ZEILEMIT 
         dd inter
         LITN text_buffer
         dd DUP

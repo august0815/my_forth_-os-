@@ -356,60 +356,60 @@
 ;
 
 : CONSTANT
-	TEILWORT		( get the name (the name follows CONSTANT) )
-	HEADER		( make the dictionary entry )
-	DOCOL ,		( append DOCOL (the codeword field of this word) )
-	' LIT ,		( append the codeword LIT )
-	,		( append the value on the top of the stack )
-	' EXIT ,	( append the codeword EXIT )
+	TEILWORT
+	HEADER	
+	DOCOL ,	
+	' LIT ,	
+	,
+	' EXIT ,
 ;
 : ALLOT		( n -- addr )
-	HERE @ SWAP	( here n )
-	HERE +!		( adds n to HERE, after this the old value of HERE is still on the stack )
+	HERE @ SWAP	
+	HERE +!	
 ;
 : CELLS ( n -- n ) 4 * ;
 : VARIABLE
-	1 CELLS ALLOT	( allocate 1 cell of memory, push the pointer to this memory )
-	TEILWORT HEADER	( make the dictionary entry (the name follows VARIABLE) )
-	DOCOL ,		( append DOCOL (the codeword field of this word) )
-	' LIT ,		( append the codeword LIT )
-	,		( append the pointer to the new memory )
-	' EXIT ,	( append the codeword EXIT )
+	1 CELLS ALLOT
+	TEILWORT HEADER	
+	DOCOL ,	
+	' LIT ,	
+	,
+	' EXIT ,
 ;
 : VALUE		( n -- )
-	TEILWORT HEADER	( make the dictionary entry (the name follows VALUE) )
-	DOCOL ,		( append DOCOL )
-	' LIT ,		( append the codeword LIT )
-	,		( append the initial value )
-	' EXIT ,	( append the codeword EXIT )
+	TEILWORT HEADER	
+	DOCOL ,
+	' LIT ,
+	,
+	' EXIT ,
 ;
 
 : TO IMMEDIATE	( n -- )
-	TEILWORT		( get the name of the value )
-	FIND		( look it up in the dictionary )
-	>DFA		( get a pointer to the first data field (the 'LIT') )
-	4+		( increment to point at the value )
-	STATE @ IF	( compiling? )
-		' LIT ,		( compile LIT )
-		,		( compile the address of the value )
-		' ! ,		( compile ! )
-	ELSE		( immediate mode )
-		!		( update it straightaway )
+	TEILWORT
+	FIND
+	>DFA
+	4+
+	STATE @ IF
+		' LIT ,	
+		,
+		' ! ,
+	ELSE
+		!
 	THEN
 ;
 
 ( x +TO VAL adds x to VAL )
 : +TO IMMEDIATE
-	TEILWORT		( get the name of the value )
-	FIND		( look it up in the dictionary )
-	>DFA		( get a pointer to the first data field (the 'LIT') )
-	4+		( increment to point at the value )
-	STATE @ IF	( compiling? )
-		' LIT ,		( compile LIT )
-		,		( compile the address of the value )
-		' +! ,		( compile +! )
-	ELSE		( immediate mode )
-		+!		( update it straightaway )
+	TEILWORT
+	FIND
+	>DFA
+	4+
+	STATE @ IF	
+		' LIT ,	
+		,
+		' +! ,	
+	ELSE
+		+!	
 	THEN
 ;
 : ID.
@@ -762,10 +762,18 @@ HIDE FIND ;
 HIDE WHILE ;
 HIDE REPEAT ;
 
-( HIDE ' ( LIT is identical ) )
+( HIDE ' ( LIT is identical ) ) ;
+        
 
 
-: DOES> R> LATEST @ >DFA ! ; 
+
+ 
+: DODOES   R>  LATEST @ >CFA ! ;
+: <BUILDS  TEILWORT HEADER   ;
+: DOES> ( - a)   ' DODOES ,  232 C, (DOES) (HERE) @ 4+ - , ;
+
+
+
 : DEPTH ( -- +n ) S0 @ 4- DSP@ - 4 / ;
 : .S ( -- ) S0 @ DEPTH 1 ?DO 4- DUP @ . LOOP DROP ;
 : HERE ( -- addr ) (HERE) @ ;
@@ -773,14 +781,13 @@ HIDE REPEAT ;
 
 echoon ;
 
-: CREATE ( "<spaces>name" -- ) 
-	1 CELLS ALLOT 	( HERE push the pointer to this memory )
-	TEILWORT HEADER	( make the dictionary entry  )
-	DOCOL ,		( append DOCOL (the codeword field of this word) )
-	' LIT ,		( append the codeword LIT )
-	,		( append the pointer to the new memory )
-	' EXIT , 	( append the codeword EXIT ) ;
+: CREATE1 ( "<spaces>name" -- ) 
+	1 CELLS ALLOT	TEILWORT HEADER	DOCOL ,	' LIT ,	, 
+	' EXIT ,
+;
 IMMEDIATE ;
+
+
 echooff ;
 
 : TRUE ( -- true ) -1 ;
@@ -826,7 +833,7 @@ IMMEDIATE ;
 : 2* ( n -- [n*2] ) DUP + ;
 : U2/ ( n -- [n/2] ) 1 SHR ;
 
-: <BUILDS TEILWORT HEADER dodoes , 0 , ;
+( <BUILDS TEILWORT HEADER dodoes , 0 , )
 ( DOES> R> LATEST @ >DFA ! ) 
 : >BODY ( xt -- a-addr ) 2 CELLS + ;
 
@@ -1100,7 +1107,7 @@ IMMEDIATE ;
 0 CONSTANT NULL
 3 CONSTANT MF
 
-CREATE MONTHTABLE ;
+CREATE1 MONTHTABLE ;
       1 , S" JANUARY " , 31 , ;
       2 , S" FEBRUARY " , 28 , ;
       3 , S"   MARCH " , 31 , ; 

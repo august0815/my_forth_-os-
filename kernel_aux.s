@@ -49,7 +49,7 @@ defword "TEILEMIT",TEILEMIT,0
 dd EXIT		; EXIT		(return from FORTH word)			
 
 
-; function: TELL   rewrite it !!!! still for linux
+; function: TELL   rewrite it !!!! 
 defword "TELL" ,TELL , 0
 	dd DROP, PRINTCSTRING ;printt
 	dd EXIT

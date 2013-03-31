@@ -111,11 +111,14 @@ align 4
 ;   non-native words. A non-native word is formed by a serie of pointers to the 
 ;   codewords of other forth words. DOCOL executes each one of these codewords.
 DOCOL:
-            PUSHRSP esi         ; Saves the return point
-            add eax, 4          ; eax pointed to the codeword of this word,
-            mov esi, eax        ;   now esi points to the first word
-            NEXT
-
+           ; PUSHRSP esi         ; Saves the return point
+           ; add eax, 4          ; eax pointed to the codeword of this word,
+           ; mov esi, eax        ;   now esi points to the first word
+           ; NEXT
+ 	    lea ebp,[ebp-4]
+        mov [ebp],esi           ; push esi on to the return stack
+        lea esi,[eax+4]         ; esi points to first data word
+       NEXT
 ; function: EXIT
 ;   EXIT is the last word of a forth word (a non-defcode word). It restores the 
 ;   value of esi, stored in the return stack by DOCOL when this word started.

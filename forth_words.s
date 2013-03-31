@@ -637,21 +637,39 @@ defcode "ROLL", Roll,0 ; Added by RTR
         mov [esp],eax
 _roll_next:
        NEXT  
-defcode "doLIST", doLIST, 0;             
-		call _doLIST
-		NEXT
-_doLIST:
-        PUSHRSP esi
-        pop     esi
+defcode "doLIST", doLIST, 0;   
+	 XCHG  eBP,eSP                 
+
+      PUSH  eSI                     
+
+      XCHG  eBP,eSP                  
+
+      POP   eSI                    
+
+ 
         NEXT
-		
+defcode "(DOES)" , dodoes,0
+    
+_does:
+        PUSHRSP esi           ; // push %esi on to the return stack
+        pop esi               ; // point %esi at the does> part
+        add eax,4             ;// push the CFA of the defined word
+        push eax
+        NEXT
+
+    	
 
 defcode  "doCREATE" , doCREATE ,0
-		;call _doCREATE
-		;NEXT
+		nop
+		nop
+		nop
+		nop
+		nop
+		call _doCREATE
+		NEXT
 _doCREATE:	
-		mov     edi,[var_LATEST] 
-        pop     edi
+		mov     edi,[var_HERE] 
+      ;  pop     edi
         mov     eax,    [edi]
         lea     ebx,    [edi + 4]
         push    ebx
@@ -662,7 +680,7 @@ _doCREATE:
         jmp     eax
 		ret
 
-defcode "dodoes", Dodoes, 0;
+defcode "dodoes1", Dodoes1, 0;
 __doCREATE:	; mov eax, [var_LATEST]
        	LEA     eBP,[eBP - 4] ;Push HIP.
         MOV     [ebp],esi
@@ -674,9 +692,8 @@ __doCREATE:	; mov eax, [var_LATEST]
 .L1:
         jmp     eax
 
-defcode "dodoes1", Dodoes1, 0;
+defcode "dodoes", Dodoes, 0;
 _dodoes:
-		mov eax,[var_HERE]
         cmp dword [eax+4],0     ; Has DOES> been executed ?
         jz _nodoes
         lea ebp,[ebp-4]
